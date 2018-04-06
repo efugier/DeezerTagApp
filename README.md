@@ -1,0 +1,63 @@
+Deezer Project: **TagApp**
+---
+# Running the app
+
+Run `docker-compose up`.
+
+
+# DB UML
+
+![UML](.\UML.png)
+
+As there is a lot of N:M relations, the natural choice is graph databases. 
+
+This will prevent redundancy and will also facilitate the implementation of more complex request later on.
+
+I chose **Neo4j** as it the most well known graph DB and seems to be the easiest to use.
+
+## Ideas for future
+
+* Add a weight on the `TAGS` relation to quantify how rock a song is.
+
+# Architecture
+
+## Node.js + Vue.js + Neo4j
+
+* **Server app** that can be used as an API
+* **Front app** that can talk to the server (and hopefully to deezer's API).
+
+# Front fonctionalities
+
+* Search for tagged content
+* Tag content
+* (Interface the tag db with the deezer API)
+
+# Server functionnalities
+
+## Add tags to content
+
+`POST /artist/123` or `POST /track/456` or `POST /album/789`
+
+request body (tag list) `["tag_a", "tag_b", ...]`
+
+## Get content list from a tag set
+
+Returns the content that has all the requested tags
+
+`GET /album?tags[]=tag_a&tags[]=tag_b` or `GET /track?tags[]=...` or `GET /artist?tags[]=...`
+
+Response body (list of ids) `[123, 456, ... ]`
+
+## Export all the tagged content
+
+Returns one json object per line.
+
+`GET /export`
+
+Response body
+```
+{"type":"artist", "id": 123, "tags":["tag_a", "tag_b", ...]}
+{"type":"track",  "id": 456, "tags":["tag_c", "tag_d", ...]}
+{"type":"album",  "id": 789, "tags":["tag_e", "tag_f", ...]}
+...
+```
