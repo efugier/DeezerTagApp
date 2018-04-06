@@ -1,5 +1,12 @@
 Deezer Project: **TagApp**
 ---
+
+# DB user credentials
+* username: `dzr-tagapp`
+* password: `b.iOn7rkVfA3Um.hIXu9Y5ozByCxE3m`
+* connexion string (BOLT): `bolt://hobby-cpenebmekcnhgbkekkadncal.dbs.graphenedb.com:24786`
+
+
 # Running the app
 
 Run `docker-compose up`.
