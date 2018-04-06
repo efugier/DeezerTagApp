@@ -33,11 +33,38 @@ app.sendQuerry = (res, req, params = {}) => {
         })
 }
 
+app.post('/newTag', (req, res) => {
+    const params = {
+        idTag: req.body._id
+    }
+    const querry = "CREATE (n:Tag { _id : {idTag} }) RETURN n._id AS _id"
+
+    app.sendQuerry(res, querry, params)
+})
+
 app.post('/newTrack', (req, res) => {
     const params = {
         idTrack: req.body._id
     }
     const querry = "CREATE (n:Track { _id : {idTrack} }) RETURN n._id AS _id"
+
+    app.sendQuerry(res, querry, params)
+})
+
+app.post('/newAlbum', (req, res) => {
+    const params = {
+        idAlbum: req.body._id
+    }
+    const querry = "CREATE (n:Album { _id : {idAlbum} }) RETURN n._id AS _id"
+
+    app.sendQuerry(res, querry, params)
+})
+
+app.post('/newArtist', (req, res) => {
+    const params = {
+        idArtist: req.body._id
+    }
+    const querry = "CREATE (n:Artist { _id : {idArtist} }) RETURN n._id AS _id"
 
     app.sendQuerry(res, querry, params)
 })
