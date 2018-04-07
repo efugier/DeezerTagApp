@@ -47,6 +47,12 @@ I chose **Neo4j** as it the most well known graph DB and seems to be the easiest
 
 request body (tag list) `["tag_a", "tag_b", ...]`
 
+## Get tags associated with content
+
+`GET /artist/123` 
+
+Response body (list of tags) `["tag_a", "tag_b", ... ]`
+
 ## Get content list from a tag set
 
 Returns the content that has all the requested tags
