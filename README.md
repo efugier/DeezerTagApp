@@ -41,7 +41,7 @@ I chose **Neo4j** as it the most well known graph DB and seems to be the easiest
 
 # Server functionnalities
 
-## Add tags to content
+## Add tags to content, OK !
 
 `POST /artist/123` or `POST /track/456` or `POST /album/789`
 

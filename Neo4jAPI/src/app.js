@@ -12,9 +12,8 @@ const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver("bolt://hobby-cpenebmekcnhgbkekkadncal.dbs.graphenedb.com:24786", neo4j.auth.basic("dzr-tagapp", "b.iOn7rkVfA3Um.hIXu9Y5ozByCxE3m"))
 
 
-// Querry wrapper
-
-app.sendQuerry = (res, req, params = {}) => {
+// Query wrapper
+app.sendQuery = (res, req, params = {}) => {
     const session = driver.session()
     session
         .run(req, params)
@@ -23,54 +22,59 @@ app.sendQuerry = (res, req, params = {}) => {
                 console.log(record)
             })
             session.close()
-            res.send({
-                success: true,
-                message: 'Querry successful!'
-            })
+            res.send({ success: true, message: 'Query successful!' })
         })
         .catch(function (error) {
             console.log(error)
-            res.send({
-                success: false,
-                message: error
-            })
+            res.send({ success: false, message: error })
         })
 }
 
 
-// POST
+const validLabels = ["tag", "track", "album", "artist"]
 
+// POST
 app.post('/new/:label/:id', (req, res) => {
     // Check if the label is legit
-    if (["Tag", "Track", "Album", "Artist"].indexOf(req.params.label) > -1) {
-        const params = { idTag: req.params.id }
-        const querry = "MERGE (n:" + req.params.label + " { _id : {idTag} }) RETURN n._id AS _id"
-        app.sendQuerry(res, querry, params)
+    if (validLabels.indexOf(req.params.label) > -1) {
+        // Merge the node
+        let query = "MERGE (n:" + req.params.label + " { _id : {id} })"
+        let params = { id: req.params.id }
+
+        // Processing the tags
+        if (Array.isArray(req.body)) {
+            i = 0
+            for (let tag of req.body) {
+                let ti = "t" + i, tagi = "tag" + i++
+                params[tagi] = tag
+                // Merge each tag and merge the connexion
+                query += " MERGE (" + ti + ":tag { _id : {" + tagi + "} })" + " MERGE (" + ti + ")-[:TAGS]->(n)"
+            }
+        }
+        app.sendQuery(res, query, params)
     } else {
-        console.log("Invalid label")
         res.send({ success: false, message: "Invalid label" })
     }
 })
 
-// // Static Post Querry
+// // Post Query for a given label
 // app.post('/newTrack/:id', (req, res) => {
 //     const params = {
 //         idTrack: id
 //     }
-//     const querry = "MERGE (n:Track { _id : {idTrack} }) RETURN n._id AS _id"
+//     const query = "MERGE (n:Track { _id : {idTrack} }) RETURN n._id AS _id"
 
-//     app.sendQuerry(res, querry, params)
+//     app.sendQuery(res, query, params)
 // })
 
 
 // DELETE
-
 app.delete('/del/:label/:id', (req, res) => {
     // Check if the label is legit
-    if (["Tag", "Track", "Album", "Artist"].indexOf(req.params.label) > -1) {
-        const querry = "MATCH (n:" + req.params.label + " { _id : {id} }) DELETE n"
-        const params = { label: req.params.label, id: req.params.id }
-        app.sendQuerry(res, querry, params)
+    if (validLabels.indexOf(req.params.label) > -1) {
+        const query = "MATCH (n:" + req.params.label + " { _id : {id} }) DETACH DELETE n"
+        const params = { id: req.params.id }
+        app.sendQuery(res, query, params)
     } else {
         console.log("Invalid label")
         res.send({ success: false, message: "Invalid label" })
@@ -79,14 +83,20 @@ app.delete('/del/:label/:id', (req, res) => {
 
 
 // GET
+app.get('/:label/:id', (req, res) => {
+    // Check if the label is legit
+    if (validLabels.indexOf(req.params.label) > -1) {
+        const query = "MATCH (n:" + req.params.label + " { _id : {id} }) RETURN n"
+        const params = { id: req.params.id }
+        app.sendQuery(res, query, params)
+    } else {
+        console.log("Invalid label")
+        res.send({ success: false, message: "Invalid label" })
+    }
+})
 
-app.get('/posts', (req, res) => {
-    res.send(
-        [{
-            title: "Hello World!",
-            description: "Hi there! How are you?"
-        }]
-    )
+app.get('/:label', (req, res) => {
+    res.send(req.query.tags)
 })
 
 app.listen(process.env.PORT || 8081)
