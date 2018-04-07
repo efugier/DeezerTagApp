@@ -47,7 +47,7 @@ I chose **Neo4j** as it the most well known graph DB and seems to be the easiest
 
 request body (tag list) `["tag_a", "tag_b", ...]`
 
-## Get tags associated with content
+## Get tags associated with content OK !
 
 `GET /artist/123` 
 
