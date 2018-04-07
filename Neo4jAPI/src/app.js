@@ -8,9 +8,9 @@ app.use(morgan('combined'))
 app.use(bodyParser.json())
 app.use(cors())
 
-
 const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver("bolt://hobby-cpenebmekcnhgbkekkadncal.dbs.graphenedb.com:24786", neo4j.auth.basic("dzr-tagapp", "b.iOn7rkVfA3Um.hIXu9Y5ozByCxE3m"))
+
 
 // Querry wrapper
 
@@ -30,53 +30,55 @@ app.sendQuerry = (res, req, params = {}) => {
         })
         .catch(function (error) {
             console.log(error)
+            res.send({
+                success: false,
+                message: error
+            })
         })
 }
 
-app.post('/newTag', (req, res) => {
-    const params = {
-        idTag: req.body._id
-    }
-    const querry = "CREATE (n:Tag { _id : {idTag} }) RETURN n._id AS _id"
 
-    app.sendQuerry(res, querry, params)
+// POST
+
+app.post('/new/:label/:id', (req, res) => {
+    // Check if the label is legit
+    if (["Tag", "Track", "Album", "Artist"].indexOf(req.params.label) > -1) {
+        const params = { idTag: req.params.id }
+        const querry = "MERGE (n:" + req.params.label + " { _id : {idTag} }) RETURN n._id AS _id"
+        app.sendQuerry(res, querry, params)
+    } else {
+        console.log("Invalid label")
+        res.send({ success: false, message: "Invalid label" })
+    }
 })
 
-app.post('/newTrack', (req, res) => {
-    const params = {
-        idTrack: req.body._id
-    }
-    const querry = "CREATE (n:Track { _id : {idTrack} }) RETURN n._id AS _id"
+// // Static Post Querry
+// app.post('/newTrack/:id', (req, res) => {
+//     const params = {
+//         idTrack: id
+//     }
+//     const querry = "MERGE (n:Track { _id : {idTrack} }) RETURN n._id AS _id"
 
-    app.sendQuerry(res, querry, params)
-})
+//     app.sendQuerry(res, querry, params)
+// })
 
-app.post('/newAlbum', (req, res) => {
-    const params = {
-        idAlbum: req.body._id
-    }
-    const querry = "CREATE (n:Album { _id : {idAlbum} }) RETURN n._id AS _id"
 
-    app.sendQuerry(res, querry, params)
-})
-
-app.post('/newArtist', (req, res) => {
-    const params = {
-        idArtist: req.body._id
-    }
-    const querry = "CREATE (n:Artist { _id : {idArtist} }) RETURN n._id AS _id"
-
-    app.sendQuerry(res, querry, params)
-})
+// DELETE
 
 app.delete('/del/:label/:id', (req, res) => {
-    console.log(querry, id, label)
-    const querry = "MATCH (n:{label} { _id : {id} }) DELETE n"
-    const params = { label: req.params.label, id: req.params.id }
-
-    app.sendQuerry(res, querry, params)
+    // Check if the label is legit
+    if (["Tag", "Track", "Album", "Artist"].indexOf(req.params.label) > -1) {
+        const querry = "MATCH (n:" + req.params.label + " { _id : {id} }) DELETE n"
+        const params = { label: req.params.label, id: req.params.id }
+        app.sendQuerry(res, querry, params)
+    } else {
+        console.log("Invalid label")
+        res.send({ success: false, message: "Invalid label" })
+    }
 })
 
+
+// GET
 
 app.get('/posts', (req, res) => {
     res.send(
