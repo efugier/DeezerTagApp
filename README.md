@@ -12,9 +12,9 @@ The API is then listening on port `8081`.
 ### Informations
 
 As this is only a demo, I chose for convinience to host the data base (for free) on graphendb which means it is:
-* Limited to $1k$ nodes
-* Limited to $10k$ relations
-* Hosted in Nothern Viginia (US) which leads somewhat slow response time.
+* Limited to **1k** nodes
+* Limited to **10k** relations
+* Hosted in Nothern Viginia (US) which leads somewhat **slow** response time.
 
 ### Visualization
 
