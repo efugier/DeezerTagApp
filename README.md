@@ -18,8 +18,8 @@ As this is only a demo, I chose for convinience to host the data base (for free)
 
 ### Visualization
 
-Can be visualized [here](https://hobby-ecmbfbmekcnhgbkeephhacal.dbs.graphenedb.com:24786/browser/) using these credentials
-* login:    `dzrtagdemo`
+The db can be visualized [here](https://hobby-ecmbfbmekcnhgbkeephhacal.dbs.graphenedb.com:24786/browser/) using these credentials
+* login:    `dzrtagdemo@yopmail.com`
 * password: `dzrtagdemopwd`
 
 ### Server side use
