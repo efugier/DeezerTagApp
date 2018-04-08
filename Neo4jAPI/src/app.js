@@ -55,25 +55,29 @@ app.getIdsQuery = (res, query, params) => {
         })
 }
 
-
-// export I WANT THIS TO BE A GOD DAMN PIPE
+// export
+// write data chunk by chunk in the response
 app.exportData = (res, query) => {
-    const stream = require('stream')
+    res.writeHead(200, {
+        'Content-Type': 'text/plain',
+        'Transfer-Encoding': 'chunked',
+        'Trailer': 'Content-MD5'
+    });
     const session = driver.session()
-    let exportString = ""
     session
         .run(query)
         .subscribe({
             onNext: function (record) {
                 const newObj = {
-                    "type": record.get("label"),
+                    "type": record.get("label")[0],
                     "id": record.get("id"),
                     "tags": record.get("tags")
                 }
-                exportString += JSON.stringify(newObj) + '\n'
+                res.write(JSON.stringify(newObj) + '\n')
             },
             onCompleted: function () {
-                res.send(exportString)
+                res.addTrailers({ 'Content-MD5': '7895bf4b8828b55ceaf47747b4bca667' })
+                res.end()
                 session.close();
             },
             onError: function (error) {
@@ -82,6 +86,7 @@ app.exportData = (res, query) => {
             }
         })
 }
+
 
 
 const validLabels = ["tag", "track", "album", "artist"]

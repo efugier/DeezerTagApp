@@ -20,11 +20,14 @@ As there is a lot of N:M relations, the natural choice is graph databases.
 
 This will prevent redundancy and will also facilitate the implementation of more complex request later on.
 
+Relations between artists, albums and track are _not_ implemented but it could easily be done.
+
 I chose **Neo4j** as it the most well known graph DB and seems to be the easiest to use.
 
-## Ideas for future
+## Possibilities for future
 
 * Add a weight on the `TAGS` relation to quantify how rock a song is.
+* Implement the missing relations.
 
 # Architecture
 
@@ -71,7 +74,7 @@ Returns the content that has all the requested tags
 
 Response body (list of ids) `[123, 456, ... ]`
 
-## Export all the tagged content
+## Export all the tagged content OK !
 
 Returns one json object per line.
 
