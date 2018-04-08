@@ -16,7 +16,6 @@ const fs = require('fs')
 
 // Query to DB using the BOLT protocol
 
-
 // Write Query wrapper
 app.writeQuery = (res, query, params) => {
     const session = driver.session()
@@ -36,50 +35,83 @@ app.writeQuery = (res, query, params) => {
 }
 
 
-// Query wrapper to return ids list
-
+// Query wrapper to return an array of content ids
 app.getIdsQuery = (res, query, params) => {
     const session = driver.session()
-    const readTxResultPromise = session.readTransaction(function (transaction) {
-        let result = transaction.run(query, params);
-        return result;
-    })
-    readTxResultPromise.then(function (result) {
-        session.close();
-        let ids = []
-        for (record of result.records) {
-            ids.push.apply(ids, record.get("ids"))  // faster than concat for in place merging of 2 arrays
-        }
-        res.send(ids)
-    }).catch(function (error) {
-        console.log(error)
-    })
+    let ids = []
+    session
+        .run(query, params)
+        .subscribe({
+            onNext: function (record) {
+                ids.push.apply(ids, record.get("ids"))  // faster than concat for in place merging of 2 arrays
+            },
+            onCompleted: function () {
+                res.send(ids)
+                session.close();
+            },
+            onError: function (error) {
+                console.log(error);
+            }
+        })
 }
 
 
-// Stream query 
+// export I WANT THIS TO BE A GOD DAMN PIPE
+app.exportData = (res) => {
 
-app.exportData = (res, query, params) => {
+    // MATCH (n:artist) RETURN labels(n) AS label, n._id AS id, [(n)<-[:TAGS]-(t:tag) | t._id] AS tags
+    // UNION
+    // MATCH (n:track) RETURN labels(n) AS label, n._id AS id, [(n)<-[:TAGS]-(t:tag) | t._id] AS tags
+    // ...
+
+    let exportString = ""
+    let query = ""
+    const labels = ["artist", "album", "track"]
+    i = 0
+    for (let contentType of labels) {
+        query += "MATCH (n:" + contentType + ") \
+        RETURN labels(n) AS label, n._id AS id, [(n)<-[: TAGS]-(t: tag) | t._id] AS tags"
+        if (++i < labels.length) { query += " UNION " }
+    }
     const session = driver.session()
-    const readTxResultPromise = session.readTransaction(function (transaction) {
-        let result = transaction.run(query, params);
-        return result;
-    })
-    readTxResultPromise.then(function (result) {
-        session.close();
-        res.send(result.records.length > 0 ? result.records[0].get("ids") : [])
-    }).catch(function (error) {
-        console.log(error)
-    })
+    session
+        .run(query)
+        .subscribe({
+            onNext: function (record) {
+                const newObj = {
+                    "type": record.get("label"),
+                    "id": record.get("id"),
+                    "tags": record.get("tags")
+                }
+                exportString += JSON.stringify(newObj) + '\n'
+            },
+            onCompleted: function () {
+                res.send(exportString)
+                session.close();
+            },
+            onError: function (error) {
+                console.log(error);
+            }
+        })
 }
 
 
 const validLabels = ["tag", "track", "album", "artist"]
 
 
-// HTTP requests
 
-// GET content tags
+// HTTP requests
+// Basically truning http into Cypher 
+
+
+// GET
+
+// Export
+app.get('/export', (req, res) => {
+    app.exportData(res)
+})
+
+// Content tags
 app.get('/:label/:id', (req, res) => {
     // Check if the label is legit
     if (validLabels.indexOf(req.params.label) > -1) {
@@ -97,15 +129,14 @@ app.get('/:label/:id', (req, res) => {
     }
 })
 
-// GET tagged content
-// MATCH (a:artist) WHERE (:tag {_id: "rock"})-[:TAGS]->(a) RETURN a
+//  tagged content
 app.get('/:label?', (req, res) => {
     // Check if the label is legit
     if (validLabels.indexOf(req.params.label) > -1) {
 
         // Let's build a query that looks like this:
         // MATCH (n:artist) 
-        // RETURN [(n)<-[:TAGS]-(t:tag {_id: {tag0}}) AND (n)<-[:TAGS]-(t:tag {_id: {tag1}}) | n._id] AS ids
+        // RETURN [(n)<-[:TAGS]-(:tag {_id: {tag0}}) AND (n)<-[:TAGS]-(:tag {_id: {tag1}}) AND ... | n._id] AS ids
 
         let params = {}
         let query = "MATCH (n:" + req.params.label + ") RETURN "
@@ -137,9 +168,16 @@ app.get('/:label?', (req, res) => {
 
 
 // POST
+// New content with tags
 app.post('/new/:label/:id', (req, res) => {
     // Check if the label is legit
     if (validLabels.indexOf(req.params.label) > -1) {
+
+        // MERGE (n:label { _id: {id} })
+        // MERGE (t0:tag { _id: {tag0} }) MERGE (t0)-[:TAGS]->(n)
+        // MERGE (t1:tag { _id: {tag1} }) MERGE (t1)-[:TAGS]->(n) 
+        // ...
+
         // Merge the node
         let query = "MERGE (n:" + req.params.label + " { _id : {id} })"
         let params = { id: req.params.id }
@@ -168,6 +206,9 @@ app.post('/new/:label/:id', (req, res) => {
 app.delete('/del/:label/:id', (req, res) => {
     // Check if the label is legit
     if (validLabels.indexOf(req.params.label) > -1) {
+
+        // MATCH (n:label {_id: {id} }) DETACH DELETE n
+
         const query = "MATCH (n:" + req.params.label + " { _id : {id} }) DETACH DELETE n"
         const params = { id: req.params.id }
         app.writeQuery(res, query, params)
@@ -182,6 +223,11 @@ app.delete('/del/:label/:id/tags', (req, res) => {
     // Check if the label is legit
     if (validLabels.indexOf(req.params.label) > -1) {
         if (Array.isArray(req.body) && req.body.length > 0) {
+
+            // MATCH (n:label { _id: {id} })<-[r:TAGS]-(t:tag { _id: {tag0} }) DELETE r;
+            // MATCH (n:label { _id: {id} })<-[r:TAGS]-(t:tag { _id: {tag1} }) DELETE r;
+            // ...
+
             let query = ""
             let params = { id: req.params.id }
             i = 0
