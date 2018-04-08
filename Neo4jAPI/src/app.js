@@ -12,7 +12,6 @@ const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver("bolt://hobby-cpenebmekcnhgbkekkadncal.dbs.graphenedb.com:24786", neo4j.auth.basic("dzr-tagapp", "b.iOn7rkVfA3Um.hIXu9Y5ozByCxE3m"))
 
 
-const fs = require('fs')
 
 // Query to DB using the BOLT protocol
 
@@ -51,29 +50,17 @@ app.getIdsQuery = (res, query, params) => {
             },
             onError: function (error) {
                 console.log(error);
+                res.send({ success: false, message: error })
             }
         })
 }
 
 
 // export I WANT THIS TO BE A GOD DAMN PIPE
-app.exportData = (res) => {
-
-    // MATCH (n:artist) RETURN labels(n) AS label, n._id AS id, [(n)<-[:TAGS]-(t:tag) | t._id] AS tags
-    // UNION
-    // MATCH (n:track) RETURN labels(n) AS label, n._id AS id, [(n)<-[:TAGS]-(t:tag) | t._id] AS tags
-    // ...
-
-    let exportString = ""
-    let query = ""
-    const labels = ["artist", "album", "track"]
-    i = 0
-    for (let contentType of labels) {
-        query += "MATCH (n:" + contentType + ") \
-        RETURN labels(n) AS label, n._id AS id, [(n)<-[: TAGS]-(t: tag) | t._id] AS tags"
-        if (++i < labels.length) { query += " UNION " }
-    }
+app.exportData = (res, query) => {
+    const stream = require('stream')
     const session = driver.session()
+    let exportString = ""
     session
         .run(query)
         .subscribe({
@@ -91,6 +78,7 @@ app.exportData = (res) => {
             },
             onError: function (error) {
                 console.log(error);
+                res.send({ success: false, message: error })
             }
         })
 }
@@ -108,7 +96,21 @@ const validLabels = ["tag", "track", "album", "artist"]
 
 // Export
 app.get('/export', (req, res) => {
-    app.exportData(res)
+
+    // MATCH (n:artist) RETURN labels(n) AS label, n._id AS id, [(n)<-[:TAGS]-(t:tag) | t._id] AS tags
+    // UNION
+    // MATCH (n:track) RETURN labels(n) AS label, n._id AS id, [(n)<-[:TAGS]-(t:tag) | t._id] AS tags
+    // ...
+
+    let query = ""
+    const typeOfContent = ["artist", "album", "track"]
+    i = 0
+    for (let contentType of typeOfContent) {
+        query += "MATCH (n:" + contentType + ") \
+        RETURN labels(n) AS label, n._id AS id, [(n)<-[: TAGS]-(t: tag) | t._id] AS tags"
+        if (++i < typeOfContent.length) { query += " UNION " }
+    }
+    app.exportData(res, query)
 })
 
 // Content tags
