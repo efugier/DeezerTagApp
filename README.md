@@ -18,9 +18,11 @@ As this is only a demo, I chose for convinience to host the data base (for free)
 
 ### Visualization
 
-The db can be visualized [here](https://hobby-ecmbfbmekcnhgbkeephhacal.dbs.graphenedb.com:24786/browser/) using these credentials
+The db can be visualized [here](https://app.graphenedb.com/dbs/dzrtagdemo/overview) using these credentials
 * login:    `dzrtagdemo@yopmail.com`
 * password: `dzrtagdemopwd`
+
+Then go at the bottom of the page, Tools: Neo4j browser, click `Launch`.
 
 ### Server side use
 
