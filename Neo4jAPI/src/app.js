@@ -186,10 +186,9 @@ app.delete('/del/:label/:id/tags', (req, res) => {
             let params = { id: req.params.id }
             i = 0
             for (let tag of req.body) {
-                // looks for each relation and delete it
+                // look for each relation and delete it
                 tagi = "tag" + i++
                 params[tagi] = tag
-                // Where the node is tagged by each tag
                 query += "MATCH (:" + req.params.label + " { _id : {id} })\
                 <-[r:TAGS]-(:tag { _id: {" + tagi + "} }) DELETE r; "
             }
