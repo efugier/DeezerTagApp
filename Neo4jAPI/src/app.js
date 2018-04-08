@@ -11,7 +11,11 @@ app.use(cors())
 const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver("bolt://hobby-cpenebmekcnhgbkekkadncal.dbs.graphenedb.com:24786", neo4j.auth.basic("dzr-tagapp", "b.iOn7rkVfA3Um.hIXu9Y5ozByCxE3m"))
 
+
+const fs = require('fs')
+
 // Query to DB using the BOLT protocol
+
 
 // Write Query wrapper
 app.writeQuery = (res, query, params) => {
@@ -32,24 +36,59 @@ app.writeQuery = (res, query, params) => {
 }
 
 
-// Query wrapper to return tags list
-app.getIdQuery = (res, query, params) => {
+// Query wrapper to return ids list
+
+app.getIdsQuery = (res, query, params) => {
     const session = driver.session()
-    session
-        .run(query, params)
-        .then(function (result) {
-            let tags = []
-            result.records.forEach(function (record) {
-                console.log(record.get("id"))
-                tags.push(record.get("id"))
-            })
-            session.close()
-            res.send(tags)
-        })
-        .catch(function (error) {
-            console.log(error)
-            res.send({ success: false, message: error })
-        })
+    const readTxResultPromise = session.readTransaction(function (transaction) {
+        let result = transaction.run(query, params);
+        return result;
+    })
+    readTxResultPromise.then(function (result) {
+        session.close();
+        let ids = []
+        for (record of result.records) {
+            ids.push.apply(ids, record.get("ids"))  // faster than concat for in place merging of 2 arrays
+        }
+        res.send(ids)
+    }).catch(function (error) {
+        console.log(error)
+    })
+}
+
+// app.getIdsQuery = (res, query, params) => {
+//     const session = driver.session()
+//     session
+//         .run(query, params)
+//         .then(function (result) {
+//             let ids = []
+//             result.records.forEach(function (record) {
+//                 console.log(record.get("id"))
+//                 ids.push(record.get("id"))
+//             })
+//             session.close()
+//             res.send(ids)
+//         })
+//         .catch(function (error) {
+//             console.log(error)
+//             res.send({ success: false, message: error })
+//         })
+// }
+
+// Stream query 
+
+app.exportData = (res, query, params) => {
+    const session = driver.session()
+    const readTxResultPromise = session.readTransaction(function (transaction) {
+        let result = transaction.run(query, params);
+        return result;
+    })
+    readTxResultPromise.then(function (result) {
+        session.close();
+        res.send(result.records.length > 0 ? result.records[0].get("ids") : [])
+    }).catch(function (error) {
+        console.log(error)
+    })
 }
 
 
@@ -73,25 +112,25 @@ app.getIdQuery = (res, query, params) => {
 //         })
 // }
 
-// Query wrapper to return tags list
-app.getExportQuery = (res, query, params) => {
-    const session = driver.session()
-    session
-        .run(query, params)
-        .then(function (result) {
-            let tags = []
-            result.records.forEach(function (record) {
-                console.log(record.get("tag"))
-                tags.push(record.get("tag"))
-            })
-            session.close()
-            res.send(tags)
-        })
-        .catch(function (error) {
-            console.log(error)
-            res.send({ success: false, message: error })
-        })
-}
+// // Query wrapper to return tags list
+// app.getExport = (res, query, params) => {
+//     const session = driver.session()
+//     session
+//         .run(query, params)
+//         .then(function (result) {
+//             let tags = []
+//             result.records.forEach(function (record) {
+//                 console.log(record.get("tag"))
+//                 tags.push(record.get("tag"))
+//             })
+//             session.close()
+//             res.send(tags)
+//         })
+//         .catch(function (error) {
+//             console.log(error)
+//             res.send({ success: false, message: error })
+//         })
+// }
 
 // // Query wrapper to return tags list
 // app.getTagQuery = (res, query, params) => {
@@ -125,46 +164,51 @@ const validLabels = ["tag", "track", "album", "artist"]
 app.get('/:label/:id', (req, res) => {
     // Check if the label is legit
     if (validLabels.indexOf(req.params.label) > -1) {
-        const query = "MATCH (n:" + req.params.label + "), (t:tag) \
-        WHERE n._id = {id} AND (t)-[:TAGS]->(n) RETURN t._id AS id"
+
+        // MATCH (n:label {_id: id}) RETURN [(n)<-[:TAGS]-(t:tag) | t._id] AS ids
+
+        const query = "MATCH (n:" + req.params.label + " { _id: {id} }) \
+         RETURN [(n)<-[:TAGS]-(t:tag) | t._id] AS ids"
         const params = { id: req.params.id }
-        app.getIdQuery(res, query, params)
+        // app.getIdsQuery(res, query, params)
+        app.getIdsQuery(res, query, params)
     } else {
         console.log("Invalid label")
         res.send({ success: false, message: "Invalid label" })
     }
 })
 
-// works:           (t0:tag { _id : {tag0} })
-// does not work    (:tag { _id : {tag0} })
-
-//MERGE (n:track { _id : {id} }) MERGE (t0:tag { _id : {tag0} }) MERGE (t0)-[:TAGS]->(n) MERGE (t1:tag { _id : {tag1} }) MERGE (t1)-[:TAGS]->(n) MERGE (t2:tag { _id : {tag2} }) MERGE (t2)-[:TAGS]->(n) 
-//MATCH (n:artist) WHERE (:tag { _id : {tag0} })-[:TAGS]->(a) RETURN n._id AS id 
-
 // GET tagged content
 // MATCH (a:artist) WHERE (:tag {_id: "rock"})-[:TAGS]->(a) RETURN a
 app.get('/:label?', (req, res) => {
-    console.log(req.query)
     // Check if the label is legit
     if (validLabels.indexOf(req.params.label) > -1) {
-        let query = "MATCH (n:" + req.params.label + ")"
-        let params = { id: req.params.id }
 
-        // Processing the tags
+        // Let's build a query that looks like this:
+        // MATCH (n:artist) 
+        // RETURN [(n)<-[:TAGS]-(t:tag {_id: {tag0}}) AND (n)<-[:TAGS]-(t:tag {_id: {tag1}}) | n._id] AS ids
+
+        let params = {}
+        let query = "MATCH (n:" + req.params.label + ") RETURN "
+        // Processing tags
         if (Array.isArray(req.query.tags) && req.query.tags.length > 0) {
             i = 0
-            query += " WHERE"
+            query += " ["
             for (let tag of req.query.tags) {
+                // add (n)<-[:TAGS]-(t:tag {_id: {tagi} })
                 tagi = "tag" + i++
                 params[tagi] = tag
                 // Where the node is tagged by each tag
-                query += " (:tag { _id : {" + tagi + "} })-[:TAGS]->(n)"
-                if (i < req.query.tags.length) { query += " AND" }
+                query += "(:tag { _id : {" + tagi + "} })-[:TAGS]->(n)"
+                if (i < req.query.tags.length) { query += " AND " }
             }
+            query += " | n._id]"
+        } else {
+            query += "[n._id]"
         }
-        query += " RETURN n._id AS id"
+        query += " AS ids"
         console.log(query, params)
-        app.getIdQuery(res, query, params)
+        app.getIdsQuery(res, query, params)
     } else {
         console.log("Invalid label")
         res.send({ success: false, message: "Invalid label" })
@@ -172,18 +216,18 @@ app.get('/:label?', (req, res) => {
 })
 
 // GET export
-app.get('/:label/:id', (req, res) => {
-    // Check if the label is legit
-    if (validLabels.indexOf(req.params.label) > -1) {
-        const query = "MATCH (n:" + req.params.label + "), (t:tag) \
-        WHERE n._id = {id} AND (t)-[:TAGS]->(n) RETURN t._id AS tag"
-        const params = { id: req.params.id }
-        app.getTagQuery(res, query, params)
-    } else {
-        console.log("Invalid label")
-        res.send({ success: false, message: "Invalid label" })
-    }
-})
+// app.get('/:label/:id', (req, res) => {
+//     // Check if the label is legit
+//     if (validLabels.indexOf(req.params.label) > -1) {
+//         const query = "MATCH (n:" + req.params.label + "), (t:tag) \
+//         WHERE n._id = {id} AND (t)-[:TAGS]->(n) RETURN t._id AS id"
+//         const params = { id: req.params.id }
+//         app.getTagQuery(res, query, params)
+//     } else {
+//         console.log("Invalid label")
+//         res.send({ success: false, message: "Invalid label" })
+//     }
+// })
 
 
 // POST
@@ -205,7 +249,6 @@ app.post('/new/:label/:id', (req, res) => {
             }
         }
         console.log(query, params)
-        app.getIdQuery(query, params)
         app.writeQuery(res, query, params)
     } else {
         res.send({ success: false, message: "Invalid label" })
@@ -214,12 +257,42 @@ app.post('/new/:label/:id', (req, res) => {
 
 
 // DELETE
+
+// Delete content
 app.delete('/del/:label/:id', (req, res) => {
     // Check if the label is legit
     if (validLabels.indexOf(req.params.label) > -1) {
         const query = "MATCH (n:" + req.params.label + " { _id : {id} }) DETACH DELETE n"
         const params = { id: req.params.id }
         app.writeQuery(res, query, params)
+    } else {
+        console.log("Invalid label")
+        res.send({ success: false, message: "Invalid label" })
+    }
+})
+
+// Remove tags from content
+app.delete('/del/:label/:id/tags', (req, res) => {
+    // Check if the label is legit
+    if (validLabels.indexOf(req.params.label) > -1) {
+        if (Array.isArray(req.body) && req.body.length > 0) {
+            let query = ""
+            let params = { id: req.params.id }
+            i = 0
+            for (let tag of req.body) {
+                // looks for each relation and delete it
+                tagi = "tag" + i++
+                params[tagi] = tag
+                // Where the node is tagged by each tag
+                query += "MATCH (:" + req.params.label + " { _id : {id} })\
+                <-[r:TAGS]-(:tag { _id: {" + tagi + "} }) DELETE r; "
+            }
+            console.log(query, params)
+            app.writeQuery(res, query, params)
+        } else {
+            console.log("Invalid or empty body")
+            res.send({ success: false, message: "Invalid or empty body" })
+        }
     } else {
         console.log("Invalid label")
         res.send({ success: false, message: "Invalid label" })

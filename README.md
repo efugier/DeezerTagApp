@@ -45,7 +45,7 @@ I chose **Neo4j** as it the most well known graph DB and seems to be the easiest
 
 `POST /artist/123` or `POST /track/456` or `POST /album/789`
 
-request body (tag list) `["tag_a", "tag_b", ...]`
+Request body (tag list) `["tag_a", "tag_b", ...]`
 
 ## Get tags associated with content OK !
 
@@ -53,7 +53,17 @@ request body (tag list) `["tag_a", "tag_b", ...]`
 
 Response body (list of tags) `["tag_a", "tag_b", ... ]`
 
-## Get content list from a tag set
+## Delete content OK !
+
+`DELETE /artist/123` 
+
+## Delete tags OK !
+
+`DELETE /artist/123` 
+
+Request body (tag list) `["tag_a", "tag_b", ...]`
+
+## Get content list from a tag set OK !
 
 Returns the content that has all the requested tags
 
