@@ -56,24 +56,6 @@ app.getIdsQuery = (res, query, params) => {
     })
 }
 
-// app.getIdsQuery = (res, query, params) => {
-//     const session = driver.session()
-//     session
-//         .run(query, params)
-//         .then(function (result) {
-//             let ids = []
-//             result.records.forEach(function (record) {
-//                 console.log(record.get("id"))
-//                 ids.push(record.get("id"))
-//             })
-//             session.close()
-//             res.send(ids)
-//         })
-//         .catch(function (error) {
-//             console.log(error)
-//             res.send({ success: false, message: error })
-//         })
-// }
 
 // Stream query 
 
@@ -90,69 +72,6 @@ app.exportData = (res, query, params) => {
         console.log(error)
     })
 }
-
-
-// // Query wrapper to
-// app.getTaggedQuery = (res, query, params) => {
-//     const session = driver.session()
-//     session
-//         .run(query, params)
-//         .then(function (result) {
-//             let tags = []
-//             result.records.forEach(function (record) {
-//                 console.log(record.get("_id"))
-//                 tags.push(record.get("_id"))
-//             })
-//             session.close()
-//             res.send(tags)
-//         })
-//         .catch(function (error) {
-//             console.log(error)
-//             res.send({ success: false, message: error })
-//         })
-// }
-
-// // Query wrapper to return tags list
-// app.getExport = (res, query, params) => {
-//     const session = driver.session()
-//     session
-//         .run(query, params)
-//         .then(function (result) {
-//             let tags = []
-//             result.records.forEach(function (record) {
-//                 console.log(record.get("tag"))
-//                 tags.push(record.get("tag"))
-//             })
-//             session.close()
-//             res.send(tags)
-//         })
-//         .catch(function (error) {
-//             console.log(error)
-//             res.send({ success: false, message: error })
-//         })
-// }
-
-// // Query wrapper to return tags list
-// app.getTagQuery = (res, query, params) => {
-//     const session = driver.session()
-
-//     var tags = []
-//     session
-//         .run(query, params)
-//         .subscribe({
-//             onNext: function (record) {
-//                 console.log(record.get("tag"))
-//                 tags.push(record.get("tag"))
-//             },
-//             onCompleted: function () {
-//                 session.close();
-//             },
-//             onError: function (error) {
-//                 console.log(error);
-//             }
-//         })
-//     return tags
-// }
 
 
 const validLabels = ["tag", "track", "album", "artist"]
@@ -215,19 +134,6 @@ app.get('/:label?', (req, res) => {
     }
 })
 
-// GET export
-// app.get('/:label/:id', (req, res) => {
-//     // Check if the label is legit
-//     if (validLabels.indexOf(req.params.label) > -1) {
-//         const query = "MATCH (n:" + req.params.label + "), (t:tag) \
-//         WHERE n._id = {id} AND (t)-[:TAGS]->(n) RETURN t._id AS id"
-//         const params = { id: req.params.id }
-//         app.getTagQuery(res, query, params)
-//     } else {
-//         console.log("Invalid label")
-//         res.send({ success: false, message: "Invalid label" })
-//     }
-// })
 
 
 // POST
