@@ -15,6 +15,7 @@ As this is only a demo, I chose for convinience to host the data base (for free)
 * Limited to **1k** nodes
 * Limited to **10k** relations
 * Hosted in Nothern Viginia (US) which leads somewhat **slow** response time.
+* Asleep when inactive (very first connexion might be **very slows**).
 
 ### Visualization
 
