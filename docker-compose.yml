@@ -6,4 +6,4 @@ services:
     volumes:
       - ./tag-server:/usr/src/app
     ports:
-      - 5001:8081 
+      - 5001:8081
