@@ -34,7 +34,8 @@ Then go at the bottom of the page, Tools: Neo4j browser, click `Launch`.
 
 # Overview
 
-![UML](.\UML.png)
+<!-- ![UML](.\UML.png) -->
+![UML](https://i.imgur.com/OL5et8p.png)
 
 As there is a lot of N:M relations and high potential for redundancy, the natural choice is graph databases. 
 
