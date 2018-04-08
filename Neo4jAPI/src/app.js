@@ -9,7 +9,8 @@ app.use(bodyParser.json())
 app.use(cors())
 
 const neo4j = require('neo4j-driver').v1
-const driver = neo4j.driver("bolt://hobby-cpenebmekcnhgbkekkadncal.dbs.graphenedb.com:24786", neo4j.auth.basic("dzr-tagapp", "b.iOn7rkVfA3Um.hIXu9Y5ozByCxE3m"))
+const driver = neo4j.driver("bolt://hobby-ecmbfbmekcnhgbkeephhacal.dbs.graphenedb.com:24786",
+    neo4j.auth.basic("server-user", "b.TIFIvn8dL3qz.ewj9o7s3m2Xs7iHk"))
 
 
 
@@ -125,9 +126,12 @@ app.get('/:label/:id', (req, res) => {
 
         // MATCH (n:label {_id: id}) RETURN [(n)<-[:TAGS]-(t:tag) | t._id] AS ids
 
-        const query = "MATCH (n:" + req.params.label + " { _id: {id} }) \
+        const label = req.params.label
+        const id = req.params.label != "tags" ? Number(req.params.id) : req.params.id
+
+        const query = "MATCH (n:" + label + " { _id: {id} }) \
          RETURN [(n)<-[:TAGS]-(t:tag) | t._id] AS ids"
-        const params = { id: req.params.id }
+        const params = { id: id }
         // app.getIdsQuery(res, query, params)
         app.getIdsQuery(res, query, params)
     } else {
@@ -176,7 +180,7 @@ app.get('/:label?', (req, res) => {
 
 // POST
 // New content with tags
-app.post('/new/:label/:id', (req, res) => {
+app.post('/:label/:id', (req, res) => {
     // Check if the label is legit
     if (validLabels.indexOf(req.params.label) > -1) {
 
@@ -185,9 +189,12 @@ app.post('/new/:label/:id', (req, res) => {
         // MERGE (t1:tag { _id: {tag1} }) MERGE (t1)-[:TAGS]->(n) 
         // ...
 
+        const label = req.params.label
+        const id = req.params.label != "tags" ? Number(req.params.id) : req.params.id
+
         // Merge the node
-        let query = "MERGE (n:" + req.params.label + " { _id : {id} })"
-        let params = { id: req.params.id }
+        let query = "MERGE (n:" + label + " { _id : {id} })"
+        let params = { id: id }
 
         // Processing the tags
         if (Array.isArray(req.body)) {
@@ -216,8 +223,11 @@ app.delete('/del/:label/:id', (req, res) => {
 
         // MATCH (n:label {_id: {id} }) DETACH DELETE n
 
-        const query = "MATCH (n:" + req.params.label + " { _id : {id} }) DETACH DELETE n"
-        const params = { id: req.params.id }
+        const label = req.params.label
+        const id = req.params.label != "tags" ? Number(req.params.id) : req.params.id
+
+        const query = "MATCH (n:" + label + " { _id : {id} }) DETACH DELETE n"
+        const params = { id: id }
         app.writeQuery(res, query, params)
     } else {
         console.log("Invalid label")
@@ -235,14 +245,17 @@ app.delete('/del/:label/:id/tags', (req, res) => {
             // MATCH (n:label { _id: {id} })<-[r:TAGS]-(t:tag { _id: {tag1} }) DELETE r;
             // ...
 
+            const label = req.params.label
+            const id = req.params.label != "tags" ? Number(req.params.id) : req.params.id
+
             let query = ""
-            let params = { id: req.params.id }
+            let params = { id: id }
             i = 0
             for (let tag of req.body) {
                 // look for each relation and delete it
                 tagi = "tag" + i++
                 params[tagi] = tag
-                query += "MATCH (:" + req.params.label + " { _id : {id} })\
+                query += "MATCH (:" + label + " { _id : {id} })\
                 <-[r:TAGS]-(:tag { _id: {" + tagi + "} }) DELETE r; "
             }
             console.log(query, params)

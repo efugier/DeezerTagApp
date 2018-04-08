@@ -1,72 +1,84 @@
 Deezer Project: **TagApp**
 ---
 
-# DB user credentials
-* username: `dzr-tagapp`
-* password: `b.iOn7rkVfA3Um.hIXu9Y5ozByCxE3m`
-* connexion string (BOLT): `bolt://hobby-cpenebmekcnhgbkekkadncal.dbs.graphenedb.com:24786`
-
-
 # Running the app
 
 Run `docker-compose up`.
 
+The API is then listening on port `8081`.
 
-# DB UML
+## Accessing the db
+
+### Informations
+
+As this is only a demo, I chose for convinience to host the data base (for free) on graphendb which means it is:
+* Limited to $1k$ nodes
+* Limited to $10k$ relations
+* Hosted in Nothern Viginia (US) which leads somewhat slow response time.
+
+### Visualization
+
+Can be visualized [here](https://hobby-ecmbfbmekcnhgbkeephhacal.dbs.graphenedb.com:24786/browser/) using these credentials
+* login:    `dzrtagdemo`
+* password: `dzrtagdemopwd`
+
+### Server side use
+
+**DB app credentials**
+* username: `server-user`
+* password: `b.TIFIvn8dL3qz.ewj9o7s3m2Xs7iHk`
+* connexion string (BOLT): `bolt://hobby-ecmbfbmekcnhgbkeephhacal.dbs.graphenedb.com:24786`
+
+
+# Overview
 
 ![UML](.\UML.png)
 
-As there is a lot of N:M relations, the natural choice is graph databases. 
+As there is a lot of N:M relations and high potential for redundancy, the natural choice is graph databases. 
 
-This will prevent redundancy and will also facilitate the implementation of more complex request later on.
+This could also facilitate the implementation of more complex request later on.
 
-Relations between artists, albums and track are _not_ implemented but it could easily be done.
+Relations between artists, albums and tracks are _not_ implemented in this demo.
 
-I chose **Neo4j** as it the most well known graph DB and seems to be the easiest to use.
+I chose **Neo4j** as it the most well known graph DB and seemed to be the easiest to use.
 
 ## Possibilities for future
 
 * Add a weight on the `TAGS` relation to quantify how rock a song is.
-* Implement the missing relations.
+* Implement the missing relations between artists, albums and tracks.
 
-# Architecture
+# Stack
 
-## Node.js + Vue.js + Neo4j
+## Neo4j + Node.js (+ Vue.js) 
 
 * **Server app** that can be used as an API
-* **Front app** that can talk to the server (and hopefully to deezer's API).
-
-# Front fonctionalities
-
-* Search for tagged content
-* Tag content
-* (Interface the tag db with the deezer API)
+* **Coming soon**: Front app that can talk to the server (and hopefully to deezer's API).
 
 # Server functionnalities
 
-## Add tags to content, OK !
+## Add tags to content
 
 `POST /artist/123` or `POST /track/456` or `POST /album/789`
 
 Request body (tag list) `["tag_a", "tag_b", ...]`
 
-## Get tags associated with content OK !
+## Get tags associated with content
 
 `GET /artist/123` 
 
 Response body (list of tags) `["tag_a", "tag_b", ... ]`
 
-## Delete content OK !
+## Delete content
 
 `DELETE /artist/123` 
 
-## Delete tags OK !
+## Delete tags
 
-`DELETE /artist/123` 
+`DELETE /artist/123/tag` 
 
 Request body (tag list) `["tag_a", "tag_b", ...]`
 
-## Get content list from a tag set OK !
+## Get content list from a tag set
 
 Returns the content that has all the requested tags
 
@@ -74,7 +86,7 @@ Returns the content that has all the requested tags
 
 Response body (list of ids) `[123, 456, ... ]`
 
-## Export all the tagged content OK !
+## Export all the tagged content
 
 Returns one json object per line.
 
@@ -87,3 +99,9 @@ Response body
 {"type":"album",  "id": 789, "tags":["tag_e", "tag_f", ...]}
 ...
 ```
+
+# Deisred front fonctionalities
+
+* Search for tagged content
+* Tag content
+* (Interface the tag db with the deezer API)
