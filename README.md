@@ -16,7 +16,7 @@ The API is then listening on port `5001`.
 ### Informations
 
 As this is only a demo, I chose to conveniently host the data base (for free) on graphendb which means it is:
-* Asleep when inactive so the *very first* connexion is **very slows**.
+* Asleep when inactive so the *very first* connexion is **very slow**.
 * Hosted in Nothern Viginia (US) which leads somewhat **slow** response time.
 * Limited to **1k** nodes
 * Limited to **10k** relations
