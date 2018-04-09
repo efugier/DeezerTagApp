@@ -17,11 +17,11 @@ The API is then listening on port `8081`.
 
 ### Informations
 
-As this is only a demo, I chose for convinience to host the data base (for free) on graphendb which means it is:
+As this is only a demo, I chose to conveniently host the data base (for free) on graphendb which means it is:
+* Asleep when inactive so the *very first* connexion is **very slows**.
+* Hosted in Nothern Viginia (US) which leads somewhat **slow** response time.
 * Limited to **1k** nodes
 * Limited to **10k** relations
-* Hosted in Nothern Viginia (US) which leads somewhat **slow** response time.
-* Asleep when inactive (very first connexion might be **very slows**).
 
 ### Visualization
 
@@ -29,7 +29,7 @@ The db can be visualized [here](https://app.graphenedb.com/dbs/dzrtagdemo/overvi
 * login:    `dzrtagdemo@yopmail.com`
 * password: `dzrtagdemopwd`
 
-Then go at the bottom of the page, Tools: Neo4j browser, click `Launch`.
+Log in, then go at the bottom of the page, Tools: Neo4j browser, click `Launch`.
 
 ### Server side use
 
@@ -54,7 +54,7 @@ I chose **Neo4j** as it the most well known graph DB and seemed to be the easies
 
 ## Possibilities for future
 
-* Add a weight on the `TAGS` relation to quantify how rock a song is.
+* Add a weight on the `TAGS` relations to quantify how rock a song is.
 * Implement the missing relations between artists, albums and tracks.
 
 # Stack
@@ -76,7 +76,7 @@ Request body (tag list) `["tag_a", "tag_b", ...]`
 
 `GET /artist/123` 
 
-Response body (list of tags) `["tag_a", "tag_b", ... ]`
+Response body (list of tags) `["tag_a", "tag_b", ...]`
 
 ## Delete content
 
@@ -84,7 +84,7 @@ Response body (list of tags) `["tag_a", "tag_b", ... ]`
 
 ## Delete tags
 
-`DELETE /artist/123/tag` 
+`DELETE /artist/123/tag`
 
 Request body (tag list) `["tag_a", "tag_b", ...]`
 
@@ -94,7 +94,7 @@ Returns the content that has all the requested tags
 
 `GET /album?tags[]=tag_a&tags[]=tag_b` or `GET /track?tags[]=...` or `GET /artist?tags[]=...`
 
-Response body (list of ids) `[123, 456, ... ]`
+Response body (list of ids) `[123, 456, ...]`
 
 ## Export all the tagged content
 

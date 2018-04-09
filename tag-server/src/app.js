@@ -8,95 +8,94 @@ app.use(morgan('combined'))
 app.use(bodyParser.json())
 app.use(cors())
 
+
+
 const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver("bolt://hobby-ecmbfbmekcnhgbkeephhacal.dbs.graphenedb.com:24786",
     neo4j.auth.basic("server-user", "b.TIFIvn8dL3qz.ewj9o7s3m2Xs7iHk"))
 
+const queries = {
+    // Query to DB using the BOLT protocol
 
-
-// Query to DB using the BOLT protocol
-
-// Write Query wrapper
-app.writeQuery = (res, query, params) => {
-    const session = driver.session()
-    session
-        .run(query, params)
-        .then(function (result) {
-            result.records.forEach(function (record) {
-                console.log(record)
+    // Write only query wrapper
+    writeOnly: (res, query, params) => {
+        const session = driver.session()
+        session
+            .run(query, params)
+            .then(function (result) {
+                result.records.forEach(function (record) {
+                    console.log(record)
+                })
+                session.close()
+                res.send({ success: true, message: "Query successful" })
             })
-            session.close()
-            res.send({ success: true, message: "Query successful" })
-        })
-        .catch(function (error) {
-            console.log(error)
-            res.send({ success: false, message: error })
-        })
-}
-
-
-// Query wrapper to return an array of content ids
-app.getIdsQuery = (res, query, params) => {
-    const session = driver.session()
-    let ids = []
-    session
-        .run(query, params)
-        .subscribe({
-            onNext: function (record) {
-                ids.push.apply(ids, record.get("ids"))  // faster than concat for in place merging of 2 arrays
-            },
-            onCompleted: function () {
-                res.send(ids)
-                session.close();
-            },
-            onError: function (error) {
-                console.log(error);
+            .catch(function (error) {
+                console.log(error)
                 res.send({ success: false, message: error })
-            }
-        })
-}
+            })
+    },
 
-// export
-// write data chunk by chunk in the response
-app.exportData = (res, query) => {
-    res.writeHead(200, {
-        'Content-Type': 'text/plain',
-        'Transfer-Encoding': 'chunked',
-        'Trailer': 'Content-MD5'
-    });
-    const session = driver.session()
-    session
-        .run(query)
-        .subscribe({
-            onNext: function (record) {
-                const newObj = {
-                    "type": record.get("label")[0],
-                    "id": record.get("id"),
-                    "tags": record.get("tags")
+
+    // Query wrapper to return an array of content ids
+    getIds: (res, query, params) => {
+        const session = driver.session()
+        let ids = []
+        session
+            .run(query, params)
+            .subscribe({
+                onNext: function (record) {
+                    ids.push.apply(ids, record.get("ids"))  // faster than concat for in place merging of 2 arrays
+                },
+                onCompleted: function () {
+                    res.send(ids)
+                    session.close();
+                },
+                onError: function (error) {
+                    console.log(error);
+                    res.send({ success: false, message: error })
                 }
-                res.write(JSON.stringify(newObj) + '\n')
-            },
-            onCompleted: function () {
-                res.addTrailers({ 'Content-MD5': '7895bf4b8828b55ceaf47747b4bca667' })
-                res.end()
-                session.close();
-            },
-            onError: function (error) {
-                console.log(error);
-                res.send({ success: false, message: error })
-            }
-        })
+            })
+    },
+
+    // export
+    // write data chunk by chunk in the response
+    exportData: (res, query) => {
+        res.writeHead(200, {
+            'Content-Type': 'text/plain',
+            'Transfer-Encoding': 'chunked',
+            'Trailer': 'Content-MD5'
+        });
+        const session = driver.session()
+        session
+            .run(query)
+            .subscribe({
+                onNext: function (record) {
+                    const newObj = {
+                        "type": record.get("label")[0],
+                        "id": record.get("id"),
+                        "tags": record.get("tags")
+                    }
+                    res.write(JSON.stringify(newObj) + '\n')
+                },
+                onCompleted: function () {
+                    res.addTrailers({ 'Content-MD5': '7895bf4b8828b55ceaf47747b4bca667' })
+                    res.end()
+                    session.close();
+                },
+                onError: function (error) {
+                    console.log(error);
+                    res.send({ success: false, message: error })
+                }
+            })
+    }
 }
-
-
-
-const validLabels = ["tag", "track", "album", "artist"]
 
 
 
 // HTTP requests
 // Basically truning http into Cypher 
 
+const validLabels = ["tag", "track", "album", "artist"]
 
 // GET
 
@@ -116,7 +115,7 @@ app.get('/export', (req, res) => {
         RETURN labels(n) AS label, n._id AS id, [(n)<-[: TAGS]-(t: tag) | t._id] AS tags"
         if (++i < typeOfContent.length) { query += " UNION " }
     }
-    app.exportData(res, query)
+    queries.exportData(res, query)
 })
 
 // Content tags
@@ -133,7 +132,7 @@ app.get('/:label/:id', (req, res) => {
          RETURN [(n)<-[:TAGS]-(t:tag) | t._id] AS ids"
         const params = { id: id }
         // app.getIdsQuery(res, query, params)
-        app.getIdsQuery(res, query, params)
+        queries.getIds(res, query, params)
     } else {
         console.log("Invalid label")
         res.send({ success: false, message: "Invalid label" })
@@ -169,7 +168,7 @@ app.get('/:label?', (req, res) => {
         }
         query += " AS ids"
         console.log(query, params)
-        app.getIdsQuery(res, query, params)
+        queries.getIds(res, query, params)
     } else {
         console.log("Invalid label")
         res.send({ success: false, message: "Invalid label" })
@@ -207,7 +206,7 @@ app.post('/:label/:id', (req, res) => {
             }
         }
         console.log(query, params)
-        app.writeQuery(res, query, params)
+        queries.writeOnly(res, query, params)
     } else {
         res.send({ success: false, message: "Invalid label" })
     }
@@ -228,7 +227,7 @@ app.delete('/del/:label/:id', (req, res) => {
 
         const query = "MATCH (n:" + label + " { _id : {id} }) DETACH DELETE n"
         const params = { id: id }
-        app.writeQuery(res, query, params)
+        queries.writeOnly(res, query, params)
     } else {
         console.log("Invalid label")
         res.send({ success: false, message: "Invalid label" })
@@ -259,7 +258,7 @@ app.delete('/del/:label/:id/tags', (req, res) => {
                 <-[r:TAGS]-(:tag { _id: {" + tagi + "} }) DELETE r; "
             }
             console.log(query, params)
-            app.writeQuery(res, query, params)
+            queries.writeOnly(res, query, params)
         } else {
             console.log("Invalid or empty body")
             res.send({ success: false, message: "Invalid or empty body" })
