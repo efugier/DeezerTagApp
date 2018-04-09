@@ -1,4 +1,4 @@
-Deezer Project: **TagApp**
+Deezer Project: **Tag app**
 ---
 
 # Running the app
