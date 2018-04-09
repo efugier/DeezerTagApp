@@ -6,9 +6,7 @@ Deezer Project: **Tag app**
 Run the following commands:
 
 ```
-> cd tag-server
-> docker build -t tagAPI .
-> docker run -p 5001:8081 tagAPI
+> docker-compose up
 ```
 
 The API is then listening on port `5001`.
