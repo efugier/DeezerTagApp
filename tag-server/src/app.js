@@ -57,7 +57,7 @@ const queries = {
             })
     },
 
-    // export
+    // Export
     // write data chunk by chunk in the response
     exportData: (res, query) => {
         res.writeHead(200, {
@@ -92,7 +92,7 @@ const queries = {
 
 
 
-// HTTP requests
+// HTTP requests handling
 // Basically truning http into Cypher 
 
 const validLabels = ["tag", "track", "album", "artist"]
