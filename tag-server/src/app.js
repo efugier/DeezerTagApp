@@ -115,15 +115,16 @@ app.get('/export', (req, res) => {
         RETURN labels(n) AS label, n._id AS id, [(n)<-[: TAGS]-(t: tag) | t._id] AS tags"
         if (++i < typeOfContent.length) { query += " UNION " }
     }
+    console.log(query)
     queries.exportData(res, query)
 })
 
 // Content tags
 app.get('/:label/:id', (req, res) => {
-    // Check if the label is legit
+    // Check if the label is legit (prevents injection)
     if (validLabels.indexOf(req.params.label) > -1) {
 
-        // MATCH (n:label {_id: id}) RETURN [(n)<-[:TAGS]-(t:tag) | t._id] AS ids
+        // MATCH (n:label {_id: {id} }) RETURN [(n)<-[:TAGS]-(t:tag) | t._id] AS ids
 
         const label = req.params.label
         const id = req.params.label != "tags" ? Number(req.params.id) : req.params.id
@@ -131,7 +132,7 @@ app.get('/:label/:id', (req, res) => {
         const query = "MATCH (n:" + label + " { _id: {id} }) \
          RETURN [(n)<-[:TAGS]-(t:tag) | t._id] AS ids"
         const params = { id: id }
-        // app.getIdsQuery(res, query, params)
+        console.log(query, params)
         queries.getIds(res, query, params)
     } else {
         console.log("Invalid label")
@@ -139,9 +140,9 @@ app.get('/:label/:id', (req, res) => {
     }
 })
 
-//  tagged content
+//  Tagged content
 app.get('/:label?', (req, res) => {
-    // Check if the label is legit
+    // Check if the label is legit (prevents injection)
     if (validLabels.indexOf(req.params.label) > -1) {
 
         // Let's build a query that looks like this:
@@ -180,13 +181,16 @@ app.get('/:label?', (req, res) => {
 // POST
 // New content with tags
 app.post('/:label/:id', (req, res) => {
-    // Check if the label is legit
+    // Check if the label is legit (prevents injection)
     if (validLabels.indexOf(req.params.label) > -1) {
 
         // MERGE (n:label { _id: {id} })
         // MERGE (t0:tag { _id: {tag0} }) MERGE (t0)-[:TAGS]->(n)
         // MERGE (t1:tag { _id: {tag1} }) MERGE (t1)-[:TAGS]->(n) 
         // ...
+
+        // Can't only merge the relations as it would create duplicates 
+        // if one end already exists and not the other
 
         const label = req.params.label
         const id = req.params.label != "tags" ? Number(req.params.id) : req.params.id
@@ -217,7 +221,7 @@ app.post('/:label/:id', (req, res) => {
 
 // Delete content
 app.delete('/del/:label/:id', (req, res) => {
-    // Check if the label is legit
+    // Check if the label is legit (prevents injection)
     if (validLabels.indexOf(req.params.label) > -1) {
 
         // MATCH (n:label {_id: {id} }) DETACH DELETE n
@@ -227,6 +231,7 @@ app.delete('/del/:label/:id', (req, res) => {
 
         const query = "MATCH (n:" + label + " { _id : {id} }) DETACH DELETE n"
         const params = { id: id }
+        console.log(query, params)
         queries.writeOnly(res, query, params)
     } else {
         console.log("Invalid label")
@@ -236,7 +241,7 @@ app.delete('/del/:label/:id', (req, res) => {
 
 // Remove tags from content
 app.delete('/del/:label/:id/tags', (req, res) => {
-    // Check if the label is legit
+    // Check if the label is legit (prevents injection)
     if (validLabels.indexOf(req.params.label) > -1) {
         if (Array.isArray(req.body) && req.body.length > 0) {
 
