@@ -1,9 +1,7 @@
-version: '3'
+# version: '3'
 
-services:
-  tag-server:
-    build: ./tag-server
-    volumes:
-      - ./tag-server:/usr/src/app
-    ports:
-      - 5001:8081
+# services:
+#   tag-server:
+#     build: ./tag-server
+#     ports:
+#       - 5001:8081
