@@ -220,7 +220,7 @@ app.post('/:label/:id', (req, res) => {
 // DELETE
 
 // Delete content
-app.delete('/del/:label/:id', (req, res) => {
+app.delete('/:label/:id', (req, res) => {
     // Check if the label is legit (prevents injection)
     if (validLabels.indexOf(req.params.label) > -1) {
 
@@ -240,7 +240,7 @@ app.delete('/del/:label/:id', (req, res) => {
 })
 
 // Remove tags from content
-app.delete('/del/:label/:id/tags', (req, res) => {
+app.delete('/:label/:id/tags', (req, res) => {
     // Check if the label is legit (prevents injection)
     if (validLabels.indexOf(req.params.label) > -1) {
         if (Array.isArray(req.body) && req.body.length > 0) {

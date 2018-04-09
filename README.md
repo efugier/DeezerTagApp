@@ -61,8 +61,9 @@ I chose **Neo4j** as it the most well known graph DB and seemed to be the easies
 
 ## Neo4j + Node.js (+ Vue.js) 
 
-* **Server app** that can be used as an API
+* **Server API**. 
 * **Coming soon**: Front app that can talk to the server (and hopefully to deezer's API).
+
 
 # Server functionnalities
 
@@ -72,21 +73,12 @@ I chose **Neo4j** as it the most well known graph DB and seemed to be the easies
 
 Request body (tag list) `["tag_a", "tag_b", ...]`
 
+
 ## Get tags associated with content
 
-`GET /artist/123` 
+`GET /artist/123`
 
 Response body (list of tags) `["tag_a", "tag_b", ...]`
-
-## Delete content
-
-`DELETE /artist/123` 
-
-## Delete tags
-
-`DELETE /artist/123/tag`
-
-Request body (tag list) `["tag_a", "tag_b", ...]`
 
 ## Get content list from a tag set
 
@@ -109,6 +101,19 @@ Response body
 {"type":"album",  "id": 789, "tags":["tag_e", "tag_f", ...]}
 ...
 ```
+
+
+## Delete tags
+
+`DELETE /artist/123/tag`
+
+Request body (tag list) `["tag_a", "tag_b", ...]`
+
+## Delete content
+
+`DELETE /artist/123` 
+
+
 
 # Deisred front fonctionalities
 
