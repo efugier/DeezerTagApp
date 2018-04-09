@@ -11,7 +11,7 @@ Run the following commands:
 > docker run -p 5001:8081 tagAPI
 ```
 
-The API is then listening on port `8081`.
+The API is then listening on port `5001`.
 
 ## Accessing the db
 
