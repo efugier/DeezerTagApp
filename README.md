@@ -3,7 +3,7 @@ Deezer Project: **Tag app**
 
 # Running the app
 
-Run the following commands:
+Run the following command in the main folder.
 
 ```
 > docker-compose up
