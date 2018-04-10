@@ -87,7 +87,7 @@
 <script>
 import InputTag from 'vue-input-tag'
 export default {
-  name: 'HelloWorld',
+  name: 'Home',
   components: {InputTag},
   data () {
     return {
