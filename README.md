@@ -48,7 +48,7 @@ This could also facilitate the implementation of more complex request later on.
 
 Relations between artists, albums and tracks are _not_ implemented in this demo.
 
-I chose **Neo4j** as it the most well known graph DB and seemed to be the easiest to use.
+I chose **Neo4j** as it the most well known graph DB and seemed to be the easiest to use. However, **Orientdb** seems to be more suitable for alrge scale projects.
 
 ## Possibilities for future
 
