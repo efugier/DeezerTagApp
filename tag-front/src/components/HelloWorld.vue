@@ -1,6 +1,7 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
+    <input-tag :tags.sync="tagsArray"></input-tag>
     <h2>Essential Links</h2>
     <ul>
       <li>
@@ -84,11 +85,14 @@
 </template>
 
 <script>
+import InputTag from 'vue-input-tag'
 export default {
   name: 'HelloWorld',
+  components: {InputTag},
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      msg: 'Welcome to Your Vue.js App',
+      tagsArray: []
     }
   }
 }
@@ -96,7 +100,8 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
+h1,
+h2 {
   font-weight: normal;
 }
 ul {
