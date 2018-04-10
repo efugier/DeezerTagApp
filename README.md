@@ -71,6 +71,16 @@ I chose **Neo4j** as it the most well known graph DB and seemed to be the easies
 
 Request body (tag list) `["tag_a", "tag_b", ...]`
 
+## Replace content
+
+Replaces the tag list by a new one
+
+**/!\ Different implementation ideas, discussion needed.**
+
+`POST /artist/123` or `POST /track/456` or `POST /album/789`
+
+Request body (tag list) `["tag_a", "tag_b", ...]`
+
 
 ## Get tags associated with content
 
