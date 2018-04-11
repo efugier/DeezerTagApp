@@ -48,7 +48,7 @@ This could also facilitate the implementation of more complex request later on.
 
 Relations between artists, albums and tracks are _not_ implemented in this demo.
 
-I chose **Neo4j** as it the most well known graph DB and seemed to be the easiest to use.
+I chose **Neo4j** as it the most well known graph DB and seemed to be the easiest to use. However, **Orientdb** seems to be more suitable for alrge scale projects.
 
 ## Possibilities for future
 
@@ -66,6 +66,16 @@ I chose **Neo4j** as it the most well known graph DB and seemed to be the easies
 # Server functionnalities
 
 ## Add tags to content
+
+`POST /artist/123` or `POST /track/456` or `POST /album/789`
+
+Request body (tag list) `["tag_a", "tag_b", ...]`
+
+## Replace content
+
+Replaces the tag list by a new one
+
+**/!\ Different implementation ideas, discussion needed.**
 
 `POST /artist/123` or `POST /track/456` or `POST /album/789`
 
