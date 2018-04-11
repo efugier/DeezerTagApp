@@ -3,6 +3,9 @@
 > Simple tag management app
 
 * [tag array](https://www.npmjs.com/package/better-vue-input-tag)
+* [cards](https://bootstrap-vue.js.org/docs/components/card/)
+* [navbar](https://bootstrap-vue.js.org/docs/components/navbar)
+* [grid](https://bootstrap-vue.js.org/docs/components/layout#grid-options)
 
 ## Build Setup
 

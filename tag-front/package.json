@@ -16,6 +16,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "better-vue-input-tag": "^1.1.0",
+    "bootstrap-vue": "^2.0.0-rc.6",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1"
   },
