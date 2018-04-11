@@ -2,6 +2,8 @@
 
 > Simple tag management app
 
+* [tag array](https://www.npmjs.com/package/better-vue-input-tag)
+
 ## Build Setup
 
 ``` bash
