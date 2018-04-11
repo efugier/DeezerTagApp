@@ -18,7 +18,7 @@ const queries = {
     // Query to DB using the BOLT protocol
 
     // Write only query wrapper
-    writeOnly: (res, query, params) => {
+    writeOnly(res, query, params) {
         const session = driver.session()
         session
             .run(query, params)
@@ -37,7 +37,7 @@ const queries = {
 
 
     // Query wrapper to return an array of content ids
-    getIds: (res, query, params) => {
+    getIds(res, query, params) {
         const session = driver.session()
         let ids = []
         session
@@ -59,7 +59,7 @@ const queries = {
 
     // Export
     // write data chunk by chunk in the response
-    exportData: (res, query) => {
+    exportData(res, query) {
         res.writeHead(200, {
             'Content-Type': 'text/plain',
             'Transfer-Encoding': 'chunked',
@@ -94,7 +94,7 @@ const queries = {
 // Building Cypher requests
 
 const makeQuery = {
-    export: () => {
+    export() {
 
         // MATCH (n:artist) RETURN labels(n) AS label, n._id AS id, [(n)<-[:TAGS]-(t:tag) | t._id] AS tags
         // UNION
@@ -112,7 +112,7 @@ const makeQuery = {
         return query
     },
 
-    getTags: (label, id) => {
+    getTags(label, id) {
 
         // MATCH (n:label {_id: {id} }) RETURN [(n)<-[:TAGS]-(t:tag) | t._id] AS ids
 
@@ -122,7 +122,7 @@ const makeQuery = {
         return [query, params]
     },
 
-    getTaggedContent: (label, tags) => {
+    getTaggedContent(label, tags) {
 
         // MATCH (n:artist) 
         // RETURN [(n)<-[:TAGS]-(:tag {_id: {tag0}}) AND (n)<-[:TAGS]-(:tag {_id: {tag1}}) AND ... | n._id] AS ids
@@ -150,7 +150,7 @@ const makeQuery = {
         return [query, params]
     },
 
-    newContent: (label, id, tags) => {
+    newContent(label, id, tags) {
 
         // MERGE (n:label { _id: {id} })
         // MERGE (t0:tag { _id: {tag0} }) MERGE (t0)-[:TAGS]->(n)
@@ -181,7 +181,7 @@ const makeQuery = {
         return [query, params]
     },
 
-    replaceContent: (label, id, tags) => {
+    replaceContent(label, id, tags) {
 
         let [query, params] = makeQuery.deleteContent(label, id)
 
@@ -202,14 +202,17 @@ const makeQuery = {
         return [query, params]
     },
 
-    deleteContent: (label, id) => {
+    deleteContent(label, id) {
+
+        // MATCH (n:label {_id: {id} }) DETACH DELETE n
+
         const query = "MATCH (n:" + label + " { _id : {id} }) DETACH DELETE n"
         const params = { id: id }
 
         return [query, params]
     },
 
-    deleteTags: (label, id, tags) => {
+    deleteTags(label, id, tags) {
 
         // MATCH (n:label { _id: {id} })<-[r:TAGS]-(t:tag { _id: {tag0} }) DELETE r;
         // MATCH (n:label { _id: {id} })<-[r:TAGS]-(t:tag { _id: {tag1} }) DELETE r;
@@ -310,7 +313,8 @@ app.post('/:label/:id/replace', (req, res) => {
         const id = req.params.label != "tag" ? Number(req.params.id) : req.params.id
 
         // server-side diff using sets VS DETACH DELETE then merge all the new tags
-        // which one is faster ?
+        // or just 2 array in the request's body
+        // which one is faster
 
         const [query, params] = makeQuery.replaceContent(label, id, Array.isArray(req.body) ? req.body : [])
 
@@ -328,8 +332,6 @@ app.post('/:label/:id/replace', (req, res) => {
 app.delete('/:label/:id', (req, res) => {
     // Check if the label is legit 
     if (validLabels.indexOf(req.params.label) > -1) {
-
-        // MATCH (n:label {_id: {id} }) DETACH DELETE n
 
         const label = req.params.label
         const id = req.params.label != "tag" ? Number(req.params.id) : req.params.id
