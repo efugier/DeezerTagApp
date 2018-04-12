@@ -29,24 +29,24 @@
       <div class="content_types">
         <div>
 
-          <b-form-group label="Stacked radios">
-            <b-form-radio-group v-model="selected"
+          <b-form-group label="Type of content">
+            <b-form-radio-group v-model="label"
                                 :options="options"
                                 stacked
                                 name="radiosStacked">
             </b-form-radio-group>
           </b-form-group>
 
-          <b-form-group label="Stacked button style radios">
+          <!-- <b-form-group label="Stacked button style radios">
             <b-form-radio-group v-model="selected"
                                 :options="options"
                                 buttons
                                 stacked
                                 name="radioBtnStacked" />
-          </b-form-group>
+          </b-form-group> -->
 
           <div class="mt-3">
-            Selected: <strong>{{ selected }}</strong>
+            Selected: <strong>{{ label }}</strong>
           </div>
         </div>
       </div>
@@ -67,13 +67,17 @@ export default {
 
   data () {
     return {
-      selected: 'first',
+      label: 'track',
       options: [
         { text: 'Track', value: 'track' },
         { text: 'Album', value: 'album' },
         { text: 'Artist', value: 'artist' }
       ]
     }
+  },
+
+  watch: {
+    label: (_, newVal) => { console.log(newVal) }
   }
 }
 </script>
@@ -83,12 +87,18 @@ export default {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
+  text-align: left;
   color: #2c3e50;
 }
 
 .leftbar {
+  text-align: center;
   background-color: #3a3a3a;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 71.77%;
 }
 
 .logo {
@@ -105,7 +115,6 @@ export default {
 
 .navbar {
   margin: auto;
-  /* width: 50%; */
   padding: 10px;
 }
 </style>

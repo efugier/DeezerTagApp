@@ -3,9 +3,10 @@
 > Simple tag management app
 
 * [tag array](https://www.npmjs.com/package/better-vue-input-tag)
-* [cards](https://bootstrap-vue.js.org/docs/components/card/)
 * [navbar](https://bootstrap-vue.js.org/docs/components/navbar)
 * [grid](https://bootstrap-vue.js.org/docs/components/layout#grid-options)
+* [table](https://bootstrap-vue.js.org/docs/components/table#shirley-partridge)
+* [watch values](https://stackoverflow.com/questions/33257379/how-to-fire-an-event-when-v-model-changes-vue-js)
 
 ## Build Setup
 
