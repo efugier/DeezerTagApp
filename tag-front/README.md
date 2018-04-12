@@ -7,7 +7,8 @@
 * [grid](https://bootstrap-vue.js.org/docs/components/layout#grid-options)
 * [table](https://bootstrap-vue.js.org/docs/components/table#shirley-partridge)
 * [watch values](https://stackoverflow.com/questions/33257379/how-to-fire-an-event-when-v-model-changes-vue-js)
-
+* [action on row-click](https://github.com/bootstrap-vue/bootstrap-vue/issues/774)
+* [Fixing 'access control origin](https://stackoverflow.com/questions/45483759/cannot-load-deezer-api-resources-from-localhost-with-the-fetch-api)
 ## Build Setup
 
 ``` bash

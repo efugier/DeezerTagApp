@@ -37,18 +37,14 @@
             </b-form-radio-group>
           </b-form-group>
 
-          <!-- <b-form-group label="Stacked button style radios">
-            <b-form-radio-group v-model="selected"
-                                :options="options"
-                                buttons
-                                stacked
-                                name="radioBtnStacked" />
-          </b-form-group> -->
-
           <div class="mt-3">
             Selected: <strong>{{ label }}</strong>
           </div>
         </div>
+      </div>
+
+      <div class="add_content">
+
       </div>
     </div>
     </b-col>
@@ -62,6 +58,7 @@
 </template>
 
 <script>
+import TagServices from '@/services/TagServices'
 export default {
   name: 'App',
 
@@ -80,11 +77,16 @@ export default {
   methods: {
     async search () {
       console.log(this.tags.split(/, */))
+      const response = await TagServices.export()
+      console.log(response.data)
     }
   },
 
   watch: {
-    label: (_, newVal) => { console.log(newVal) }
+    label: (_, newVal) => {
+      console.log(newVal)
+      // this.router.push(newVal)
+    }
   }
 }
 </script>

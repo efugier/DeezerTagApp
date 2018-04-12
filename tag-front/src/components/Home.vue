@@ -1,27 +1,31 @@
 <template>
   <div class="hello">
     <b-row sm="4">
-      <b-col sm="3" style="text-align: center;">
-        <img src="../../img/mock_item.png" alt="Deezer logo" class="item_img">
+      <b-col sm="4" style="text-align: center;">
+        <img v-bind:src="currentItem.imgPath" alt="Item image" class="item_img">
       </b-col>
 
       <b-col class=current_item_info>
         <h3>{{ currentItem.title }}</h3>
-        <h4>{{ currentItem.subtitle }} </h4>
-        <h5>{{ "Last label: " + label }} </h5>
-          <input-tag placeholder="Enter tags here" :tags.sync="currentItem.tags"></input-tag>
-        <!-- <a href="#" @click="getTags('artist', '126')">Get tags</a> -->
+        <h5>{{ currentItem.subtitle }} </h5>
+        <h6>{{ "Label: " + label }} </h6>
+          <b-row>
+          <input-tag placeholder="Enter tags here" :tags.sync="currentItem.tags" style="margin: auto;"></input-tag>
+          <b-button size="sm" type="submit" @click="postTags" style="margin: auto;">Submit</b-button>
+          </b-row>
       </b-col>
     </b-row>
 
     <b-row>
       <div class="item_list">
-        <b-table striped hover :items="items">
+        <b-table striped hover :items="items" @row-clicked="getContent">
           <template slot="id" slot-scope="data">
-            <a :href="1+1"> {{data.value}} </a>
+            <a> {{data.value}} </a>
           </template>
           <template slot="tags" slot-scope="data" width="100%">
-              {{data.value.join(', ')}}
+            <div v-for="tag of data.value" :key="tag" style='display: inline-block;'>
+              <b-badge variant="info">{{tag}}</b-badge> &nbsp;
+            </div>
           </template>
 
         </b-table>
@@ -33,6 +37,7 @@
 <script>
 import InputTag from 'better-vue-input-tag'
 import TagServices from '@/services/TagServices'
+import DeezerServices from '@/services/DeezerServices'
 import App from '../App'
 
 export default {
@@ -47,158 +52,34 @@ export default {
         id: 123,
         title: 'Title',
         subtitle: 'Subtitle',
+        imgPath: require('../../img/mock_item.png'),
         tags: ['rock', 'guitar', 'pop rock', 'country']
       },
 
       items: [
         {
-          id: 123,
-          name: 'abc',
+          id: 1234321,
           tags: ['rock', 'guitar', 'pop']
         },
 
         {
-          id: 124,
-          name: 'efg',
+          id: 1244321,
           tags: ['rock', 'electro', 'pop']
         },
 
         {
-          id: 125,
-          name: 'ghi',
+          id: 1254321,
           tags: ['blues', 'jazz']
         },
 
         {
-          id: 126,
-          name: 'jkl',
+          id: 1264321,
           tags: ['classic', 'symphony', 'violin']
         },
 
         {
-          id: 124,
-          name: 'efg',
-          tags: ['rock', 'electro', 'pop']
-        },
-
-        {
-          id: 125,
-          name: 'ghi',
-          tags: ['blues', 'jazz']
-        },
-
-        {
           id: 126,
-          name: 'jkl',
           tags: ['classic', 'symphony', 'violin']
-        },
-
-        {
-          id: 124,
-          name: 'efg',
-          tags: ['rock', 'electro', 'pop']
-        },
-
-        {
-          id: 125,
-          name: 'ghi',
-          tags: ['blues', 'jazz']
-        },
-
-        {
-          id: 126,
-          name: 'jkl',
-          tags: ['classic', 'symphony', 'violin']
-        },
-
-        {
-          id: 124,
-          name: 'efg',
-          tags: ['rock', 'electro', 'pop']
-        },
-
-        {
-          id: 125,
-          name: 'ghi',
-          tags: ['blues', 'jazz']
-        },
-
-        {
-          id: 126,
-          name: 'jkl',
-          tags: ['classic', 'symphony', 'violin']
-        },
-
-        {
-          id: 124,
-          name: 'efg',
-          tags: ['rock', 'electro', 'pop']
-        },
-
-        {
-          id: 125,
-          name: 'ghi',
-          tags: ['blues', 'jazz']
-        },
-
-        {
-          id: 126,
-          name: 'jkl',
-          tags: ['classic', 'symphony', 'violin']
-        },
-
-        {
-          id: 124,
-          name: 'efg',
-          tags: ['rock', 'electro', 'pop']
-        },
-
-        {
-          id: 125,
-          name: 'ghi',
-          tags: ['blues', 'jazz']
-        },
-
-        {
-          id: 126,
-          name: 'jkl',
-          tags: ['classic', 'symphony', 'violin']
-        },
-
-        {
-          id: 124,
-          name: 'efg',
-          tags: ['rock', 'electro', 'pop']
-        },
-
-        {
-          id: 125,
-          name: 'ghi',
-          tags: ['blues', 'jazz']
-        },
-
-        {
-          id: 126,
-          name: 'jkl',
-          tags: ['classic', 'symphony', 'violin']
-        },
-
-        {
-          id: 124,
-          name: 'efg',
-          tags: ['rock', 'electro', 'pop']
-        },
-
-        {
-          id: 125,
-          name: 'ghi',
-          tags: ['blues', 'jazz']
-        },
-
-        {
-          id: 126,
-          name: 'jkl',
-          tags: ['classic', 'symphony', 'violin', 'end']
         }
       ]
     }
@@ -213,6 +94,19 @@ export default {
       const response = await TagServices.getTags(label, id)
       this.tagsArray = response.data
       console.log(response.data)
+    },
+
+    async getContent (record) {
+      const id = record.id
+      console.log(id)
+      const response = await DeezerServices.getContent(this.label, id).catch()
+      this.currentItem.title = response.data.title || response.data.name
+      this.currentItem.subtitle = response.data.album ? response.data.album.title + ', ' + response.data.artist.name : response.data.artist.name
+      this.currentItem.imgPath = response.data.picture_medium || response.data.album.cover_medium || response.data.artist.picture_medium
+    },
+
+    async postTags () {
+      console.log('tag post !')
     }
   }
 }
