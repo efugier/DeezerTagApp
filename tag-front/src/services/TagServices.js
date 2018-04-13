@@ -10,6 +10,10 @@ export default {
     return TagApi().get('/' + label + '/' + id, params)
   },
 
+  getTaggedContent (labelQuery, params) {
+    return TagApi().get('/' + labelQuery)
+  },
+
   newContent (label, id, params) {
     return TagApi().post('/' + label + '/' + id, params)
   },

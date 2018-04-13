@@ -8,7 +8,6 @@
       <b-col class=current_item_info>
         <h3>{{ currentItem.title }}</h3>
         <h5>{{ currentItem.subtitle }} </h5>
-        <h6>{{ "Label: " + label }} </h6>
           <b-row>
           <input-tag placeholder="Enter tags here" :tags.sync="currentItem.tags" style="margin: auto;"></input-tag>
           <b-button size="sm" type="submit" @click="postTags" style="margin: auto;">Submit</b-button>
@@ -38,7 +37,6 @@
 import InputTag from 'better-vue-input-tag'
 import TagServices from '@/services/TagServices'
 import DeezerServices from '@/services/DeezerServices'
-import App from '../App'
 
 export default {
   name: 'Home',
@@ -46,8 +44,6 @@ export default {
 
   data () {
     return {
-      label: App.data().label,
-
       currentItem: {
         id: 123,
         title: 'Title',
@@ -90,23 +86,27 @@ export default {
   },
 
   methods: {
-    async getTags (label, id) {
-      const response = await TagServices.getTags(label, id)
+    async getTags (id) {
+      const response = await TagServices.getTags(this.$route.params.label, id)
       this.tagsArray = response.data
       console.log(response.data)
     },
 
     async getContent (record) {
       const id = record.id
-      console.log(id)
-      const response = await DeezerServices.getContent(this.label, id).catch()
-      this.currentItem.title = response.data.title || response.data.name
-      this.currentItem.subtitle = response.data.album ? response.data.album.title + ', ' + response.data.artist.name : response.data.artist.name
-      this.currentItem.imgPath = response.data.picture_medium || response.data.album.cover_medium || response.data.artist.picture_medium
+      const response = await DeezerServices.getContent(this.$route.params.label, id).catch()
+      this.setCurrentItem(response.data)
+      console.log(this.$route.params.label)
     },
 
     async postTags () {
       console.log('tag post !')
+    },
+
+    setCurrentItem (item) {
+      this.currentItem.title = item.title || item.name
+      this.currentItem.subtitle = item.album ? item.album.title + ', ' + item.artist.name : item.artist && item.artist.name
+      this.currentItem.imgPath = item.picture_medium || (item.album && item.album.cover_medium) || (item.artist && item.artist.picture_medium)
     }
   }
 }

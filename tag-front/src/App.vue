@@ -65,7 +65,8 @@ export default {
   data () {
     return {
       label: 'track',
-      tags: '',
+      query: '',
+      tags: [],
       options: [
         { text: 'Track', value: 'track' },
         { text: 'Album', value: 'album' },
@@ -76,16 +77,22 @@ export default {
 
   methods: {
     async search () {
-      console.log(this.tags.split(/, */))
-      const response = await TagServices.export()
+      const tags = this.tags.split(/ *, */)
+      this.query = '?'
+      let i = 0
+      for (let tag of tags) {
+        this.query += 'tags[]=' + tag
+        if (++i < tags.length) { this.query += '&' }
+      }
+      console.log(this.query)
+      const response = await TagServices.getTaggedContent(this.label + this.query)
       console.log(response.data)
     }
   },
 
   watch: {
-    label: (_, newVal) => {
-      console.log(newVal)
-      // this.router.push(newVal)
+    label: function () { // don't use arrow here (this)
+      this.$router.push('/' + this.label + this.query)
     }
   }
 }

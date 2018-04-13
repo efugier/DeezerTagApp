@@ -8,8 +8,13 @@ export default new Router({
   routes: [
     {
       path: '/',
-      // path: '/home/:label',
       name: 'Home',
+      component: Home
+    },
+
+    {
+      path: '/:label',
+      name: 'Home with label',
       component: Home
     }
   ]
