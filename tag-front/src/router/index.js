@@ -10,6 +10,12 @@ export default new Router({
       path: '/',
       name: 'Home',
       component: Home
+    },
+
+    {
+      path: '/:label',
+      name: 'Home with label',
+      component: Home
     }
   ]
 })

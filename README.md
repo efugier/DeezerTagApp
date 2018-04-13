@@ -119,7 +119,7 @@ Request body (tag list) `["tag_a", "tag_b", ...]`
 
 ## Delete content
 
-`DELETE /artist/123` 
+`DELETE /artist/123`
 
 
 
@@ -128,3 +128,7 @@ Request body (tag list) `["tag_a", "tag_b", ...]`
 * Search for tagged content
 * Tag content
 * (Interface the tag db with the deezer API)
+
+## Why no names/titles in the table ?
+
+Limited to 50 requests per 30/s to deezer's server + the architecture would be very inefficient.

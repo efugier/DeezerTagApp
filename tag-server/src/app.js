@@ -158,7 +158,7 @@ const makeQuery = {
             i = 0
             for (let tag of tags) {
                 let ti = "t" + i, tagi = "tag" + i++
-                params[tagi] = tag
+                params[tagi] = tag.toLowerCase()
                 // Merge each tag and merge the connexion
                 query += " MERGE (" + ti + ":tag { _id : {" + tagi + "} })" + " MERGE (" + ti + ")-[:TAGS]->(n)"
             }
@@ -177,7 +177,7 @@ const makeQuery = {
             i = 0
             for (let tag of tags) {
                 let ti = "t" + i, tagi = "tag" + i++
-                params[tagi] = tag
+                params[tagi] = tag.toLowerCase()
                 // Merge each tag and merge the connexion
                 query += " MERGE (" + ti + ":tag { _id : {" + tagi + "} })" + " MERGE (" + ti + ")-[:TAGS]->(l)"
             }
@@ -210,7 +210,7 @@ const makeQuery = {
         for (let tag of tags) {
             // look for each relation and delete it
             tagi = "tag" + i++
-            params[tagi] = tag
+            params[tagi] = tag.toLowerCase()
             query += "MATCH (:" + label + " { _id : {id} })\
                 <-[r:TAGS]-(:tag { _id: {" + tagi + "} }) DELETE r; "
         }
