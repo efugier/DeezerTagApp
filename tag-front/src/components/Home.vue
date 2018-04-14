@@ -45,13 +45,16 @@ export default {
 
   data () {
     return {
-      currentItem: {
-        id: 123,
-        title: 'Title',
-        subtitle: 'Subtitle',
+      deflautItem: {
+        label: 'track',
+        id: 0,
+        title: 'No content is selected',
+        subtitle: 'click one below',
         imgPath: require('../../img/mock_item.png'),
         tags: ['rock', 'guitar', 'pop rock', 'country']
       },
+
+      currentItem: {},
 
       items: [
         {
@@ -96,25 +99,33 @@ export default {
     async getDeezerContent (record) {
       const id = record.id
       const response = await DeezerServices.getContent(this.$route.params.label, id)
+
       const item = response.data
-      item.id = record.id
-      item.tags = record.tags
-      this.setCurrentItem(item)
+      item.label = this.$route.params.label
+
+      if (!item.id) {
+        this.currentItem = Object.assign({}, this.deflautItem)
+        item.id = record.id
+      } else {
+        item.tags = record.tags
+        this.setCurrentItem(item)
+      }
     },
 
     async getContent () {
-      // const query = this.$route.fullPath.match(/\?.*/)
-      console.log(this.$route.fullPath)
       const response = await TagServices.getTaggedContent(this.$route.fullPath)
-      console.log(response.data)
+      if (!this.currentItem.id) { this.currentItem = Object.assign({}, this.deflautItem) }
+      console.log(this.deflautItem)
       this.items = response.data
     },
 
     async postTags () {
       console.log('tag post !')
+      await TagServices.replaceContent(this.currentItem.label, this.currentItem.id, this.currentItem.tags)
     },
 
     setCurrentItem (item) {
+      this.currentItem.label = item.label
       this.currentItem.id = item.id
       this.currentItem.title = item.title || item.name
       this.currentItem.subtitle = item.album ? item.album.title + ', ' + item.artist.name : item.artist && item.artist.name

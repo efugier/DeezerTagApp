@@ -76,6 +76,8 @@
 </template>
 
 <script>
+import TagServices from '@/services/TagServices'
+
 export default {
   name: 'App',
 
@@ -101,13 +103,15 @@ export default {
 
   methods: {
 
-    createItem () {
+    async createItem () {
       console.log('creation')
+      await TagServices.newContent(this.label, this.toBeCreated.id, this.toBeCreated.tagString.split(/ *, */))
       this.toBeCreated = { id: '', tagString: '' }
     },
 
-    deleteItem () {
+    async deleteItem () {
       console.log('deletion')
+      await TagServices.deleteContent(this.label, this.toBeDeleted)
       this.toBeDeleted = ''
     },
 
@@ -115,10 +119,13 @@ export default {
       const tags = this.tagString.split(/ *, */)
 
       this.query = '?'
+      console.log(tags)
       let i = 0
       for (let tag of tags) {
-        this.query += 'tags[]=' + tag
-        if (++i < tags.length) { this.query += '&' }
+        if (tag !== '') {
+          this.query += 'tags[]=' + tag
+          if (++i < tags.length) { this.query += '&' }
+        }
       }
       console.log(this.query)
       this.$router.push('/' + this.label + this.query)

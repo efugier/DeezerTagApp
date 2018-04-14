@@ -2,10 +2,6 @@ import TagApi from '@/services/TagApi'
 
 export default {
 
-  export () {
-    return TagApi().get('/export')
-  },
-
   getTags (label, id, params) {
     return TagApi().get('/' + label + '/' + id, params)
   },
@@ -19,7 +15,11 @@ export default {
   },
 
   replaceContent (label, id, params) {
-    return TagApi().post('/' + label + '/' + id, params)
+    return TagApi().post('/' + label + '/' + id + '/replace', params)
+  },
+
+  deleteContent (label, id, params) {
+    return TagApi().delete('/' + label + '/' + id, params)
   }
 
 }
