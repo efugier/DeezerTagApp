@@ -37,17 +37,17 @@ const queries = {
 
 
     // Query wrapper to return an array of content ids
-    getIds(res, query, params) {
+    getItems(res, query, params) {
         const session = driver.session()
-        let ids = []
+        let items = []
         session
             .run(query, params)
             .subscribe({
                 onNext: function (record) {
-                    ids.push.apply(ids, record.get("ids"))  // faster than concat for in place merging of 2 arrays
+                    items.push(record.get("item"))  // faster than concat for in place merging of 2 arrays
                 },
                 onCompleted: function () {
-                    res.send(ids)
+                    res.send(items)
                     session.close();
                 },
                 onError: function (error) {
@@ -131,7 +131,7 @@ const makeQuery = {
         let params = { tags: tags }
         let query = "WITH {tags} AS tags " +
             "MATCH (n:" + label + ") " +
-            "WHERE ALL(tag in tags WHERE (:tag {_id: tag})-[:TAGS]->(n)) RETURN collect({id: n._id, tags: [(n)<-[:TAGS]-(t) | t._id]}) AS ids"
+            "WHERE ALL(tag in tags WHERE (:tag {_id: tag})-[:TAGS]->(n)) RETURN {id: n._id, tags: [(n)<-[:TAGS]-(t) | t._id]} AS item"
 
         return [query, params]
     },
@@ -218,8 +218,6 @@ const makeQuery = {
         return [query, params]
     },
 
-
-
 }
 
 
@@ -248,7 +246,7 @@ app.get('/:label/:id', (req, res) => {
 
         const [query, params] = makeQuery.getTags(label, id)
         console.log(query, params)
-        queries.getIds(res, query, params)
+        queries.getItems(res, query, params)
 
     } else {
         console.log("Invalid label")
@@ -264,7 +262,7 @@ app.get('/:label?', (req, res) => {
         const [query, params] = makeQuery.getTaggedContent(req.params.label, req.query.tags)
 
         console.log(query, params)
-        queries.getIds(res, query, params)
+        queries.getItems(res, query, params)
     } else {
         console.log("Invalid label")
         res.send({ success: false, message: "Invalid label" })
