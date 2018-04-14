@@ -105,8 +105,8 @@ const makeQuery = {
         const typeOfContent = ["artist", "album", "track"]
         i = 0
         for (let contentType of typeOfContent) {
-            query += "MATCH (n:" + contentType + ") \
-        RETURN labels(n) AS label, n._id AS id, [(n)<-[: TAGS]-(t: tag) | t._id] AS tags"
+            query += "MATCH (n:" + contentType + ") " +
+                "RETURN labels(n) AS label, n._id AS id, [(n)<-[: TAGS]-(t: tag) | t._id] AS tags"
             if (++i < typeOfContent.length) { query += " UNION " }
         }
         return query
@@ -114,10 +114,10 @@ const makeQuery = {
 
     getTags(label, id) {
 
-        // MATCH (n:label {_id: {id} }) RETURN [(n)<-[:TAGS]-(t:tag) | t._id] AS ids
+        // MATCH (n:label {_id: {id} })<-[:TAGS]-(t) RETURN t._id AS item
 
-        const query = "MATCH (n:" + label + " { _id: {id} }) \
-         RETURN [(n)<-[:TAGS]-(t:tag) | t._id] AS ids"
+        const query = "MATCH (n:" + label + " { _id: {id} })<-[:TAGS]-(t)" +
+            "RETURN t._id AS item"
         const params = { id: id }
         return [query, params]
     },
@@ -128,7 +128,7 @@ const makeQuery = {
         // MATCH (n:label) 
         // WHERE ALL(tag in tags WHERE (:tag {_id: tag})-[:TAGS]->(n)) RETURN collect({id: n._id, tags: [(n)<-[:TAGS]-(t) | t._id]}) AS ids
 
-        let params = { tags: tags }
+        let params = { tags: tags ? tags : [] }
         let query = "WITH {tags} AS tags " +
             "MATCH (n:" + label + ") " +
             "WHERE ALL(tag in tags WHERE (:tag {_id: tag})-[:TAGS]->(n)) RETURN {id: n._id, tags: [(n)<-[:TAGS]-(t) | t._id]} AS item"
