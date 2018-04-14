@@ -16,7 +16,7 @@
             <b-navbar-nav class="ml-auto">
 
               <b-nav-form>
-                <b-form-input size="sm" class="mr-sm-2" type="text" v-model="tags" placeholder="coma-separated tags"/>
+                <b-form-input size="sm" class="mr-sm-2" type="text" v-model="tagString" placeholder="coma-separated tags"/>
                 <b-button size="sm" class="my-2 my-sm-0" type="submit" @click="search">Search</b-button>
               </b-nav-form>
 
@@ -58,7 +58,6 @@
 </template>
 
 <script>
-import TagServices from '@/services/TagServices'
 export default {
   name: 'App',
 
@@ -66,7 +65,7 @@ export default {
     return {
       label: 'track',
       query: '',
-      tags: [],
+      tagString: '',
       options: [
         { text: 'Track', value: 'track' },
         { text: 'Album', value: 'album' },
@@ -77,7 +76,8 @@ export default {
 
   methods: {
     async search () {
-      const tags = this.tags.split(/ *, */)
+      const tags = this.tagString.split(/ *, */)
+
       this.query = '?'
       let i = 0
       for (let tag of tags) {
@@ -85,13 +85,12 @@ export default {
         if (++i < tags.length) { this.query += '&' }
       }
       console.log(this.query)
-      const response = await TagServices.getTaggedContent(this.label + this.query)
-      console.log(response.data)
+      this.$router.push('/' + this.label + this.query)
     }
   },
 
   watch: {
-    label: function () { // don't use arrow here (this)
+    label: function () { // don't use arrow function here (this)
       this.$router.push('/' + this.label + this.query)
     }
   }

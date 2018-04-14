@@ -8,6 +8,7 @@
       <b-col class=current_item_info>
         <h3>{{ currentItem.title }}</h3>
         <h5>{{ currentItem.subtitle }} </h5>
+        <h6>ID: {{ currentItem.id }} </h6>
           <b-row>
           <input-tag placeholder="Enter tags here" :tags.sync="currentItem.tags" style="margin: auto;"></input-tag>
           <b-button size="sm" type="submit" @click="postTags" style="margin: auto;">Submit</b-button>
@@ -17,7 +18,7 @@
 
     <b-row>
       <div class="item_list">
-        <b-table striped hover :items="items" @row-clicked="getContent">
+        <b-table striped hover :items="items" @row-clicked="getDeezerContent">
           <template slot="id" slot-scope="data">
             <a> {{data.value}} </a>
           </template>
@@ -82,7 +83,7 @@ export default {
   },
 
   mounted () {
-
+    this.getContent()
   },
 
   methods: {
@@ -92,11 +93,21 @@ export default {
       console.log(response.data)
     },
 
-    async getContent (record) {
+    async getDeezerContent (record) {
       const id = record.id
-      const response = await DeezerServices.getContent(this.$route.params.label, id).catch()
-      this.setCurrentItem(response.data)
-      console.log(this.$route.params.label)
+      const response = await DeezerServices.getContent(this.$route.params.label, id)
+      const item = response.data
+      item.id = record.id
+      item.tags = record.tags
+      this.setCurrentItem(item)
+    },
+
+    async getContent () {
+      // const query = this.$route.fullPath.match(/\?.*/)
+      console.log(this.$route.fullPath)
+      const response = await TagServices.getTaggedContent(this.$route.fullPath)
+      console.log(response.data)
+      this.items = response.data
     },
 
     async postTags () {
@@ -104,9 +115,18 @@ export default {
     },
 
     setCurrentItem (item) {
+      this.currentItem.id = item.id
       this.currentItem.title = item.title || item.name
       this.currentItem.subtitle = item.album ? item.album.title + ', ' + item.artist.name : item.artist && item.artist.name
       this.currentItem.imgPath = item.picture_medium || (item.album && item.album.cover_medium) || (item.artist && item.artist.picture_medium)
+      this.currentItem.tags = item.tags
+    }
+  },
+
+  watch: {
+    $route: function () { // don't use arrow function here (this)
+      this.getContent()
+      console.log(this.$route.fullPath)
     }
   }
 }
