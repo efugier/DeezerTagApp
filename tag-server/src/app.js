@@ -124,16 +124,14 @@ const makeQuery = {
 
     getTaggedContent(label, tags) {
 
-        // id + tags: WITH ['jazz'] AS tags MATCH (n:artist) WHERE ALL(tag in tags WHERE (:tag {_id: tag})-[:TAGS]->(n)) RETURN collect({id: n._id, tags: [(n)<-[:TAGS]-(t) | t._id]})
-
         // WITH ['pop', 'rock'] AS tags 
         // MATCH (n:label) 
-        // WHERE ALL(tag in tags WHERE (:tag {_id: tag})-[:TAGS]->(n)) RETURN collect(n._id)
+        // WHERE ALL(tag in tags WHERE (:tag {_id: tag})-[:TAGS]->(n)) RETURN collect({id: n._id, tags: [(n)<-[:TAGS]-(t) | t._id]}) AS ids
 
         let params = { tags: tags }
         let query = "WITH {tags} AS tags " +
             "MATCH (n:" + label + ") " +
-            "WHERE ALL(tag in tags WHERE (:tag {_id: tag})-[:TAGS]->(n)) RETURN collect(n._id) AS ids"
+            "WHERE ALL(tag in tags WHERE (:tag {_id: tag})-[:TAGS]->(n)) RETURN collect({id: n._id, tags: [(n)<-[:TAGS]-(t) | t._id]}) AS ids"
 
         return [query, params]
     },
