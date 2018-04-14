@@ -31,15 +31,15 @@
 
           <b-form-group label="Type of content">
             <b-form-radio-group v-model="label"
-                                :options="options"
+                                :options="contentTypes"
                                 stacked
                                 name="radiosStacked">
             </b-form-radio-group>
           </b-form-group>
-
-          <div class="mt-3">
-            Selected: <strong>{{ label }}</strong>
-          </div>
+        </div>
+        <div class="create_delete">
+          <b-btn v-b-modal.modal-create style="margin: 30px;">New</b-btn>
+          <b-btn v-b-modal.modal-delete style="margin: 30px;">Delete</b-btn>
         </div>
       </div>
 
@@ -54,6 +54,24 @@
     </b-col>
     </b-row>
     </b-container>
+
+  <div class="create_del_modal">
+    <b-modal id="modal-create" centered :title="'New ' + label" @ok="createItem">
+      <b-form-input type="text"
+                      placeholder="ID"
+                      v-model="toBeCreated.id"></b-form-input>
+      <br>
+      <b-form-input type="text"
+                      placeholder="Coma-separated tags"
+                      v-model="toBeCreated.tagString"></b-form-input>
+    </b-modal>
+
+    <b-modal id="modal-delete" centered :title="'Delete ' + label" @ok="deleteItem">
+      <b-form-input type="text"
+                      placeholder="ID"
+                      v-model="toBeDeleted"></b-form-input>
+    </b-modal>
+  </div>
   </div>
 </template>
 
@@ -64,17 +82,35 @@ export default {
   data () {
     return {
       label: 'track',
-      query: '',
       tagString: '',
-      options: [
+      query: '',
+
+      contentTypes: [
         { text: 'Track', value: 'track' },
         { text: 'Album', value: 'album' },
         { text: 'Artist', value: 'artist' }
-      ]
+      ],
+
+      toBeCreated: {
+        id: '',
+        tagString: ''
+      },
+      toBeDeleted: ''
     }
   },
 
   methods: {
+
+    createItem () {
+      console.log('creation')
+      this.toBeCreated = { id: '', tagString: '' }
+    },
+
+    deleteItem () {
+      console.log('deletion')
+      this.toBeDeleted = ''
+    },
+
     async search () {
       const tags = this.tagString.split(/ *, */)
 
@@ -126,6 +162,16 @@ export default {
   text-align: left;
   padding: 20px;
   color: #ffffff;
+}
+
+.create_delete {
+  text-align: center;
+  padding: 40px;
+  color: #ffffff;
+}
+
+.create_delete_podal {
+  margin: auto;
 }
 
 .navbar {
