@@ -8,7 +8,7 @@
       <b-col class=current_item_info>
         <h3>{{ currentItem.title }}</h3>
         <h5>{{ currentItem.subtitle }} </h5>
-        <h6>ID: <a :href="'https://www.deezer.com/en/' + currentItem.label + '/' + currentItem.id" target="_blank">
+        <h6>Id: <a :href="'https://www.deezer.com/en/' + currentItem.label + '/' + currentItem.id" target="_blank">
         {{ currentItem.id }}
         </a> </h6>
           <b-row>
