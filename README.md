@@ -21,7 +21,7 @@ For the front:
 > docker run -p 8080:8080 tag-front .
 ```
 
-The app is then available at [http://0.0.0.0:8080/#/track](http://0.0.0.0:8080/#/track)
+The app is then available at [http://localhost:8080/#/track](http://localhost:8080/#/track) or [http://0.0.0.0:8080/#/track](http://0.0.0.0:8080/#/track)
 
 While API listens on port `8081`.
 
