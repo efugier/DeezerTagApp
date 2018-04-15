@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <link rel="shortcut icon" type="image/png" href="/static/favicon.png"/>
     <b-container>
       <b-row class="mainrow">
       <b-col sm="4">
@@ -16,7 +17,7 @@
             <b-navbar-nav class="ml-auto">
 
               <b-nav-form>
-                <b-form-input size="sm" class="mr-sm-2" type="text" v-model="tags" placeholder="coma-separated tags"/>
+                <b-form-input size="sm" class="mr-sm-2" type="text" v-model="tagString" placeholder="coma-separated tags"/>
                 <b-button size="sm" class="my-2 my-sm-0" type="submit" @click="search">Search</b-button>
               </b-nav-form>
 
@@ -31,15 +32,15 @@
 
           <b-form-group label="Type of content">
             <b-form-radio-group v-model="label"
-                                :options="options"
+                                :options="contentTypes"
                                 stacked
                                 name="radiosStacked">
             </b-form-radio-group>
           </b-form-group>
-
-          <div class="mt-3">
-            Selected: <strong>{{ label }}</strong>
-          </div>
+        </div>
+        <div class="create_delete">
+          <b-btn v-b-modal.modal-create style="margin: 30px;">New</b-btn>
+          <b-btn v-b-modal.modal-delete style="margin: 30px;">Delete</b-btn>
         </div>
       </div>
 
@@ -54,44 +55,91 @@
     </b-col>
     </b-row>
     </b-container>
+
+  <div class="create_del_modal">
+    <b-modal id="modal-create" centered :title="'New ' + label" @ok="createItem">
+      <b-form-input type="text"
+                      placeholder="ID"
+                      v-model="toBeCreated.id"></b-form-input>
+      <br>
+      <b-form-input type="text"
+                      placeholder="Coma-separated tags"
+                      v-model="toBeCreated.tagString"></b-form-input>
+    </b-modal>
+
+    <b-modal id="modal-delete" centered :title="'Delete ' + label" @ok="deleteItem">
+      <b-form-input type="text"
+                      placeholder="ID"
+                      v-model="toBeDeleted"></b-form-input>
+    </b-modal>
+  </div>
   </div>
 </template>
 
 <script>
 import TagServices from '@/services/TagServices'
+import { EventBus } from './event-bus.js'
+
 export default {
   name: 'App',
 
   data () {
     return {
       label: 'track',
+      tagString: '',
       query: '',
-      tags: [],
-      options: [
+
+      contentTypes: [
         { text: 'Track', value: 'track' },
         { text: 'Album', value: 'album' },
         { text: 'Artist', value: 'artist' }
-      ]
+      ],
+
+      toBeCreated: {
+        id: '',
+        tagString: ''
+      },
+      toBeDeleted: ''
     }
   },
 
+  mounted () {
+    this.label = this.$route.params.label || 'track'
+  },
+
   methods: {
+
+    async createItem () {
+      const str = this.toBeCreated.tagString.trim()
+      const tags = str ? str.split(/ *, */) : []
+      await TagServices.newContent(this.label, this.toBeCreated.id, tags)
+      EventBus.$emit('refresh')
+      this.toBeCreated = { id: '', tagString: '' }
+    },
+
+    async deleteItem () {
+      await TagServices.deleteContent(this.label, this.toBeDeleted)
+      EventBus.$emit('refresh')
+      this.toBeDeleted = ''
+    },
+
     async search () {
-      const tags = this.tags.split(/ *, */)
+      const tags = this.tagString.split(/ *, */)
+
       this.query = '?'
       let i = 0
       for (let tag of tags) {
-        this.query += 'tags[]=' + tag
-        if (++i < tags.length) { this.query += '&' }
+        if (tag !== '') {
+          this.query += 'tags[]=' + tag
+          if (++i < tags.length) { this.query += '&' }
+        }
       }
-      console.log(this.query)
-      const response = await TagServices.getTaggedContent(this.label + this.query)
-      console.log(response.data)
+      this.$router.push('/' + this.label + this.query)
     }
   },
 
   watch: {
-    label: function () { // don't use arrow here (this)
+    label: function () { // don't use arrow function here (this)
       this.$router.push('/' + this.label + this.query)
     }
   }
@@ -127,6 +175,16 @@ export default {
   text-align: left;
   padding: 20px;
   color: #ffffff;
+}
+
+.create_delete {
+  text-align: center;
+  padding: 40px;
+  color: #ffffff;
+}
+
+.create_delete_podal {
+  margin: auto;
 }
 
 .navbar {

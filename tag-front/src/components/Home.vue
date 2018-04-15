@@ -8,16 +8,23 @@
       <b-col class=current_item_info>
         <h3>{{ currentItem.title }}</h3>
         <h5>{{ currentItem.subtitle }} </h5>
+        <h6>ID: <a :href="'https://www.deezer.com/en/' + currentItem.label + '/' + currentItem.id" target="_blank">
+        {{ currentItem.id }}
+        </a> </h6>
           <b-row>
           <input-tag placeholder="Enter tags here" :tags.sync="currentItem.tags" style="margin: auto;"></input-tag>
-          <b-button size="sm" type="submit" @click="postTags" style="margin: auto;">Submit</b-button>
+          <b-button id="submit_button" size="sm" type="submit" @click="postTags" style="margin: auto;">Submit</b-button>
+
+          <b-popover :show.sync="showSubmitPopover" target="submit_button" title="Success" placement="bottomleft">
+            Tags have been updated !
+          </b-popover>
           </b-row>
       </b-col>
     </b-row>
 
     <b-row>
       <div class="item_list">
-        <b-table striped hover :items="items" @row-clicked="getContent">
+        <b-table striped hover :items="items" @row-clicked="getDeezerContent">
           <template slot="id" slot-scope="data">
             <a> {{data.value}} </a>
           </template>
@@ -37,6 +44,7 @@
 import InputTag from 'better-vue-input-tag'
 import TagServices from '@/services/TagServices'
 import DeezerServices from '@/services/DeezerServices'
+import { EventBus } from '../event-bus.js'
 
 export default {
   name: 'Home',
@@ -44,69 +52,82 @@ export default {
 
   data () {
     return {
-      currentItem: {
-        id: 123,
-        title: 'Title',
-        subtitle: 'Subtitle',
+      deflautItem: {
+        label: 'track',
+        id: 0,
+        title: 'Does not exist on deezer',
+        subtitle: 'Choose another one',
         imgPath: require('../../img/mock_item.png'),
-        tags: ['rock', 'guitar', 'pop rock', 'country']
+        tags: []
       },
 
-      items: [
-        {
-          id: 1234321,
-          tags: ['rock', 'guitar', 'pop']
-        },
+      showSubmitPopover: false,
 
-        {
-          id: 1244321,
-          tags: ['rock', 'electro', 'pop']
-        },
+      currentItem: {},
 
-        {
-          id: 1254321,
-          tags: ['blues', 'jazz']
-        },
-
-        {
-          id: 1264321,
-          tags: ['classic', 'symphony', 'violin']
-        },
-
-        {
-          id: 126,
-          tags: ['classic', 'symphony', 'violin']
-        }
-      ]
+      items: []
     }
   },
 
   mounted () {
-
+    this.getContent()
+    this.listenForRefresh()
   },
 
   methods: {
     async getTags (id) {
       const response = await TagServices.getTags(this.$route.params.label, id)
       this.tagsArray = response.data
-      console.log(response.data)
     },
 
-    async getContent (record) {
+    listenForRefresh () {
+      EventBus.$on('refresh', () => {
+        this.getContent()
+      })
+    },
+
+    async getDeezerContent (record) {
       const id = record.id
-      const response = await DeezerServices.getContent(this.$route.params.label, id).catch()
-      this.setCurrentItem(response.data)
-      console.log(this.$route.params.label)
+      const response = await DeezerServices.getContent(this.$route.params.label, id)
+
+      const item = response.data
+      item.label = this.$route.params.label
+
+      if (!item.id) {
+        this.currentItem = Object.assign({}, this.deflautItem)
+        this.currentItem.id = record.id
+        this.currentItem.tags = record.tags
+      } else {
+        item.tags = record.tags
+        this.setCurrentItem(item)
+      }
+    },
+
+    async getContent () {
+      const response = await TagServices.getTaggedContent(this.$route.fullPath)
+      if (!this.currentItem.id) { this.currentItem = Object.assign({}, this.deflautItem) }
+      this.items = response.data
     },
 
     async postTags () {
-      console.log('tag post !')
+      await TagServices.replaceContent(this.currentItem.label, this.currentItem.id, this.currentItem.tags)
+      this.show = true
+      setTimeout(() => { this.showSubmitPopover = false }, 500)
     },
 
     setCurrentItem (item) {
+      this.currentItem.label = item.label
+      this.currentItem.id = item.id
       this.currentItem.title = item.title || item.name
       this.currentItem.subtitle = item.album ? item.album.title + ', ' + item.artist.name : item.artist && item.artist.name
-      this.currentItem.imgPath = item.picture_medium || (item.album && item.album.cover_medium) || (item.artist && item.artist.picture_medium)
+      this.currentItem.imgPath = item.picture_medium || item.cover_medium || (item.album && item.album.cover_medium) || (item.artist && item.artist.picture_medium)
+      this.currentItem.tags = item.tags
+    }
+  },
+
+  watch: {
+    $route: function () { // don't use arrow function here (this)
+      this.getContent()
     }
   }
 }

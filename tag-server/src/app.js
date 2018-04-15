@@ -37,17 +37,17 @@ const queries = {
 
 
     // Query wrapper to return an array of content ids
-    getIds(res, query, params) {
+    getItems(res, query, params) {
         const session = driver.session()
-        let ids = []
+        let items = []
         session
             .run(query, params)
             .subscribe({
                 onNext: function (record) {
-                    ids.push.apply(ids, record.get("ids"))  // faster than concat for in place merging of 2 arrays
+                    items.push(record.get("item"))  // faster than concat for in place merging of 2 arrays
                 },
                 onCompleted: function () {
-                    res.send(ids)
+                    res.send(items)
                     session.close();
                 },
                 onError: function (error) {
@@ -105,8 +105,8 @@ const makeQuery = {
         const typeOfContent = ["artist", "album", "track"]
         i = 0
         for (let contentType of typeOfContent) {
-            query += "MATCH (n:" + contentType + ") \
-        RETURN labels(n) AS label, n._id AS id, [(n)<-[: TAGS]-(t: tag) | t._id] AS tags"
+            query += "MATCH (n:" + contentType + ") " +
+                "RETURN labels(n) AS label, n._id AS id, [(n)<-[: TAGS]-(t: tag) | t._id] AS tags"
             if (++i < typeOfContent.length) { query += " UNION " }
         }
         return query
@@ -114,24 +114,24 @@ const makeQuery = {
 
     getTags(label, id) {
 
-        // MATCH (n:label {_id: {id} }) RETURN [(n)<-[:TAGS]-(t:tag) | t._id] AS ids
+        // MATCH (n:label {_id: {id} })<-[:TAGS]-(t) RETURN t._id AS item
 
-        const query = "MATCH (n:" + label + " { _id: {id} }) \
-         RETURN [(n)<-[:TAGS]-(t:tag) | t._id] AS ids"
+        const query = "MATCH (n:" + label + " { _id: {id} })<-[:TAGS]-(t)" +
+            "RETURN t._id AS item"
         const params = { id: id }
         return [query, params]
     },
 
     getTaggedContent(label, tags) {
 
-        // WITH ['jazz'] AS tags 
+        // WITH ['pop', 'rock'] AS tags 
         // MATCH (n:label) 
-        // WHERE ALL(tag in tags WHERE (:tag {_id: tag})-[:TAGS]->(n)) RETURN collect(n._id)
+        // WHERE ALL(tag in tags WHERE (:tag {_id: tag})-[:TAGS]->(n)) RETURN collect({id: n._id, tags: [(n)<-[:TAGS]-(t) | t._id]}) AS ids
 
-        let params = { tags: tags }
+        let params = { tags: tags ? tags : [] }
         let query = "WITH {tags} AS tags " +
             "MATCH (n:" + label + ") " +
-            "WHERE ALL(tag in tags WHERE (:tag {_id: tag})-[:TAGS]->(n)) RETURN collect(n._id) AS ids"
+            "WHERE ALL(tag in tags WHERE (:tag {_id: tag})-[:TAGS]->(n)) RETURN {id: n._id, tags: [(n)<-[:TAGS]-(t) | t._id]} AS item"
 
         return [query, params]
     },
@@ -218,8 +218,6 @@ const makeQuery = {
         return [query, params]
     },
 
-
-
 }
 
 
@@ -248,7 +246,7 @@ app.get('/:label/:id', (req, res) => {
 
         const [query, params] = makeQuery.getTags(label, id)
         console.log(query, params)
-        queries.getIds(res, query, params)
+        queries.getItems(res, query, params)
 
     } else {
         console.log("Invalid label")
@@ -264,7 +262,7 @@ app.get('/:label?', (req, res) => {
         const [query, params] = makeQuery.getTaggedContent(req.params.label, req.query.tags)
 
         console.log(query, params)
-        queries.getIds(res, query, params)
+        queries.getItems(res, query, params)
     } else {
         console.log("Invalid label")
         res.send({ success: false, message: "Invalid label" })
