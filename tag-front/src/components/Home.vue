@@ -65,32 +65,7 @@ export default {
 
       currentItem: {},
 
-      items: [
-        {
-          id: 1234321,
-          tags: ['rock', 'guitar', 'pop']
-        },
-
-        {
-          id: 1244321,
-          tags: ['rock', 'electro', 'pop']
-        },
-
-        {
-          id: 1254321,
-          tags: ['blues', 'jazz']
-        },
-
-        {
-          id: 1264321,
-          tags: ['classic', 'symphony', 'violin']
-        },
-
-        {
-          id: 126,
-          tags: ['classic', 'symphony', 'violin']
-        }
-      ]
+      items: []
     }
   },
 
@@ -145,7 +120,7 @@ export default {
       this.currentItem.id = item.id
       this.currentItem.title = item.title || item.name
       this.currentItem.subtitle = item.album ? item.album.title + ', ' + item.artist.name : item.artist && item.artist.name
-      this.currentItem.imgPath = item.picture_medium || (item.album && item.album.cover_medium) || (item.artist && item.artist.picture_medium)
+      this.currentItem.imgPath = item.picture_medium || item.cover_medium || (item.album && item.album.cover_medium) || (item.artist && item.artist.picture_medium)
       this.currentItem.tags = item.tags
     }
   },

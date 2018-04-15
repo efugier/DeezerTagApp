@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <link rel="shortcut icon" type="image/png" href="/static/favicon.png"/>
     <b-container>
       <b-row class="mainrow">
       <b-col sm="4">
