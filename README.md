@@ -1,15 +1,29 @@
 Deezer Project: **Tag app**
 ---
 
+![](https://i.imgur.com/0vwr1qj.png)
+
 # Running the app
 
-Run the following command in the main folder.
+Run the following commands in the main folder.
 
+For the server:
 ```
-> docker-compose up
+> cd tag-server
+> docker build -t tag-sever .
+> docker run -p 8081:8081
 ```
 
-The API is then listening on port `5001`.
+For the front:
+```
+> cd tag-front
+> docker build -t tag-front .
+> docker run -p 8080:8080 tag-front .
+```
+
+The app is then available at [http://0.0.0.0:8080/#/track](http://0.0.0.0:8080/#/track)
+
+While API listens on port `8081`.
 
 ## Accessing the db
 
@@ -28,6 +42,14 @@ The db can be visualized [here](https://app.graphenedb.com/dbs/dzrtagdemo/overvi
 * password: `dzrtagdemopwd`
 
 Log in, then go at the bottom of the page, Tools: Neo4j browser, click `Launch`.
+
+
+# Front functionalities
+* Add and delete content by ids
+* Search for content given a set of tags
+* Get more infos on clicked content and edit its tags
+* Edited tags will only be sent to the db when `Submit` is clicked
+
 
 ### Server side use
 
@@ -57,10 +79,17 @@ I chose **Neo4j** as it the most well known graph DB and seemed to be the easies
 
 # Stack
 
-## Neo4j + Node.js (+ Vue.js) 
+## Neo4j + Node.js + Vue.js
 
 * **Server API**. 
-* **Coming soon**: Front app that can talk to the server (and hopefully to deezer's API).
+* **Front**: that can talk to the server and to deezer's API.
+
+
+# Front functionalities
+* Add and delete content by ids
+* Search for content given a set of tags
+* Get more infos on clicked content and edit its tags
+* Edited tags will only be sent to the db when `Submit` is clicked
 
 
 # Server functionnalities
@@ -94,7 +123,14 @@ Returns the content that has all the requested tags
 
 `GET /album?tags[]=tag_a&tags[]=tag_b` or `GET /track?tags[]=...` or `GET /artist?tags[]=...`
 
-Response body (list of ids) `[123, 456, ...]`
+Response body (list of ids and tags) 
+```
+[
+    { id: 123 tags: [tag_a, tag_b, tag_c...] },
+    { id: 456 tags: [tag_a, tag_b,...] },
+    ...
+]
+```
 
 ## Export all the tagged content
 
@@ -121,14 +157,6 @@ Request body (tag list) `["tag_a", "tag_b", ...]`
 
 `DELETE /artist/123`
 
-
-
-# Deisred front fonctionalities
-
-* Search for tagged content
-* Tag content
-* (Interface the tag db with the deezer API)
-
 ## Why no names/titles in the table ?
 
-Limited to 50 requests per 30/s to deezer's server + the architecture would be very inefficient.
+Limited to 50 requests per 30/s to deezer's server + the current architecture would be very inefficient.
