@@ -102,10 +102,16 @@ export default {
     }
   },
 
+  mounted () {
+    this.label = this.$route.params.label || 'track'
+  },
+
   methods: {
 
     async createItem () {
-      await TagServices.newContent(this.label, this.toBeCreated.id, this.toBeCreated.tagString.split(/ *, */))
+      const str = this.toBeCreated.tagString.trim()
+      const tags = str ? str.split(/ *, */) : []
+      await TagServices.newContent(this.label, this.toBeCreated.id, tags)
       EventBus.$emit('refresh')
       this.toBeCreated = { id: '', tagString: '' }
     },

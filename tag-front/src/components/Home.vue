@@ -8,10 +8,16 @@
       <b-col class=current_item_info>
         <h3>{{ currentItem.title }}</h3>
         <h5>{{ currentItem.subtitle }} </h5>
-        <h6>ID: {{ currentItem.id }} </h6>
+        <h6>ID: <a :href="'https://www.deezer.com/en/' + currentItem.label + '/' + currentItem.id" target="_blank">
+        {{ currentItem.id }}
+        </a> </h6>
           <b-row>
           <input-tag placeholder="Enter tags here" :tags.sync="currentItem.tags" style="margin: auto;"></input-tag>
-          <b-button size="sm" type="submit" @click="postTags" style="margin: auto;">Submit</b-button>
+          <b-button id="submit_button" size="sm" type="submit" @click="postTags" style="margin: auto;">Submit</b-button>
+
+          <b-popover :show.sync="showSubmitPopover" target="submit_button" title="Success" placement="bottomleft">
+            Tags have been updated !
+          </b-popover>
           </b-row>
       </b-col>
     </b-row>
@@ -54,6 +60,8 @@ export default {
         imgPath: require('../../img/mock_item.png'),
         tags: []
       },
+
+      showSubmitPopover: false,
 
       currentItem: {},
 
@@ -128,6 +136,8 @@ export default {
 
     async postTags () {
       await TagServices.replaceContent(this.currentItem.label, this.currentItem.id, this.currentItem.tags)
+      this.show = true
+      setTimeout(() => { this.showSubmitPopover = false }, 500)
     },
 
     setCurrentItem (item) {
