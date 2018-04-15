@@ -4,10 +4,11 @@ services:
   tag-server:
     build: ./tag-server
     ports:
-      - 5001:8081
+      - "8081:8081"
   
   tag-front:
     build: ./tag-front
     ports:
-      - 5000:8080
-    depends_on: tag-server
+      - "8080:8080"
+    depends_on:
+      - tag-server

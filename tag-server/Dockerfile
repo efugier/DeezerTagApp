@@ -1,6 +1,6 @@
 FROM node:alpine
 
-WORKDIR usr/src/app
+WORKDIR usr/src/app/tag-server
 
 COPY package*.json ./
 
