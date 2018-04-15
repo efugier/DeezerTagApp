@@ -1,4 +1,4 @@
-Deezer Project: **Tag app**
+Deezer project: **Tag app**
 ---
 
 ![](https://i.imgur.com/0vwr1qj.png)
