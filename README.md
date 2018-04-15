@@ -1,7 +1,7 @@
 Deezer project: **Tag app**
 ---
 
-![](https://i.imgur.com/6dzxbqv.png)
+![](https://i.imgur.com/DVSVBER.png)
 
 # Running the app
 
