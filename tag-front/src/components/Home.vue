@@ -49,10 +49,10 @@ export default {
       deflautItem: {
         label: 'track',
         id: 0,
-        title: 'No content is selected',
-        subtitle: 'click one below',
+        title: 'Does not exist on deezer',
+        subtitle: 'Choose another one',
         imgPath: require('../../img/mock_item.png'),
-        tags: ['rock', 'guitar', 'pop rock', 'country']
+        tags: []
       },
 
       currentItem: {},
@@ -112,7 +112,8 @@ export default {
 
       if (!item.id) {
         this.currentItem = Object.assign({}, this.deflautItem)
-        item.id = record.id
+        this.currentItem.id = record.id
+        this.currentItem.tags = record.tags
       } else {
         item.tags = record.tags
         this.setCurrentItem(item)
