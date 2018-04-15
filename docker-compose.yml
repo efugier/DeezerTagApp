@@ -5,3 +5,9 @@ services:
     build: ./tag-server
     ports:
       - 5001:8081
+  
+  tag-front:
+    build: ./tag-front
+    ports:
+      - 5000:8080
+    depends_on: tag-server
