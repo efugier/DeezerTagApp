@@ -77,6 +77,7 @@
 
 <script>
 import TagServices from '@/services/TagServices'
+import { EventBus } from './event-bus.js'
 
 export default {
   name: 'App',
@@ -104,14 +105,14 @@ export default {
   methods: {
 
     async createItem () {
-      console.log('creation')
       await TagServices.newContent(this.label, this.toBeCreated.id, this.toBeCreated.tagString.split(/ *, */))
+      EventBus.$emit('refresh')
       this.toBeCreated = { id: '', tagString: '' }
     },
 
     async deleteItem () {
-      console.log('deletion')
       await TagServices.deleteContent(this.label, this.toBeDeleted)
+      EventBus.$emit('refresh')
       this.toBeDeleted = ''
     },
 
@@ -119,7 +120,6 @@ export default {
       const tags = this.tagString.split(/ *, */)
 
       this.query = '?'
-      console.log(tags)
       let i = 0
       for (let tag of tags) {
         if (tag !== '') {
@@ -127,7 +127,6 @@ export default {
           if (++i < tags.length) { this.query += '&' }
         }
       }
-      console.log(this.query)
       this.$router.push('/' + this.label + this.query)
     }
   },

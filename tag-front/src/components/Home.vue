@@ -38,6 +38,7 @@
 import InputTag from 'better-vue-input-tag'
 import TagServices from '@/services/TagServices'
 import DeezerServices from '@/services/DeezerServices'
+import { EventBus } from '../event-bus.js'
 
 export default {
   name: 'Home',
@@ -87,13 +88,19 @@ export default {
 
   mounted () {
     this.getContent()
+    this.listenForRefresh()
   },
 
   methods: {
     async getTags (id) {
       const response = await TagServices.getTags(this.$route.params.label, id)
       this.tagsArray = response.data
-      console.log(response.data)
+    },
+
+    listenForRefresh () {
+      EventBus.$on('refresh', () => {
+        this.getContent()
+      })
     },
 
     async getDeezerContent (record) {
@@ -115,12 +122,10 @@ export default {
     async getContent () {
       const response = await TagServices.getTaggedContent(this.$route.fullPath)
       if (!this.currentItem.id) { this.currentItem = Object.assign({}, this.deflautItem) }
-      console.log(this.deflautItem)
       this.items = response.data
     },
 
     async postTags () {
-      console.log('tag post !')
       await TagServices.replaceContent(this.currentItem.label, this.currentItem.id, this.currentItem.tags)
     },
 
@@ -137,7 +142,6 @@ export default {
   watch: {
     $route: function () { // don't use arrow function here (this)
       this.getContent()
-      console.log(this.$route.fullPath)
     }
   }
 }
