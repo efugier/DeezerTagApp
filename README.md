@@ -25,6 +25,8 @@ The app is then available at [http://localhost:8080/#/track](http://localhost:80
 
 While API listens on port `8081`.
 
+The app can also be used without docker by running `npm install` and `npm start` in both `./tag-server` and `./tag-front`. 
+
 ## Accessing the db
 
 ### Informations
@@ -42,13 +44,6 @@ The db can be visualized [here](https://app.graphenedb.com/dbs/dzrtagdemo/overvi
 * password: `dzrtagdemopwd`
 
 Log in, then go at the bottom of the page, Tools: Neo4j browser, click `Launch`.
-
-
-# Front functionalities
-* Add and delete content by ids
-* Search for content given a set of tags
-* Get more infos on clicked content and edit its tags
-* Edited tags will only be sent to the db when `Submit` is clicked
 
 
 ### Server side use
@@ -79,10 +74,10 @@ I chose **Neo4j** as it the most well known graph DB and seemed to be the easies
 
 # Stack
 
-## Neo4j + Node.js + Vue.js
+## Neo4j + Express +Node.js + Vue.js
 
-* **Server API**. 
-* **Front**: that can talk to the server and to deezer's API.
+* **Server API**
+* **Front** that can talk to the server and to deezer's API.
 
 
 # Front functionalities
@@ -104,9 +99,9 @@ Request body (tag list) `["tag_a", "tag_b", ...]`
 
 Replaces the tag list by a new one
 
-**/!\ Different implementation ideas, discussion needed.**
+**/!\ suboptimal implementation**
 
-`POST /artist/123` or `POST /track/456` or `POST /album/789`
+`POST /artist/123/replace` or `POST /track/456/replace`
 
 Request body (tag list) `["tag_a", "tag_b", ...]`
 
