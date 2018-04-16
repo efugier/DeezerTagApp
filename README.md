@@ -154,4 +154,4 @@ Request body (tag list) `["tag_a", "tag_b", ...]`
 
 ## Why no names/titles in the table ?
 
-Limited to 50 requests per 30/s to deezer's server + the current architecture would be very inefficient.
+Limited to 50 requests per 30s to deezer's server + the current architecture would be very inefficient.
