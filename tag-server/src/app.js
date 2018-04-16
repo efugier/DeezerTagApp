@@ -150,11 +150,8 @@ const makeQuery = {
         let query = "MERGE (n:" + label + " { _id : {id} })"
         let params = { id: id }
 
-        console.log("Hey1")
-
         // Processing the tags
         if (Array.isArray(tags)) {
-            console.log("Hey2")
             i = 0
             for (let tag of tags) {
                 let ti = "t" + i, tagi = "tag" + i++
