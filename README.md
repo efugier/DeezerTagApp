@@ -23,7 +23,7 @@ For the front:
 
 The app is then available at [http://localhost:8080/#/track](http://localhost:8080/#/track) or [http://0.0.0.0:8080/#/track](http://0.0.0.0:8080/#/track)
 
-While API listens on port `8081`.
+While the API listens on port `8081`.
 
 The app can also be used without docker by running `npm install` and `npm start` in both `./tag-server` and `./tag-front`. 
 
