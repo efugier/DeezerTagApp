@@ -11,7 +11,7 @@ For the server:
 ```
 > cd tag-server
 > docker build -t tag-sever .
-> docker run -p 8081:8081
+> docker run -p 8081:8081 tag-server
 ```
 
 For the front:
