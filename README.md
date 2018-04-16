@@ -86,8 +86,14 @@ I chose **Neo4j** as it the most well known graph DB and seemed to be the easies
 * Get more infos on clicked content and edit its tags
 * Edited tags will only be sent to the db when `Submit` is clicked
 
+## Server functionalities actually used in the front
+* `GET` tagged content
+* `POST` create content
+* `POST` replace content
+* `DELETE` content
 
-# Server functionnalities
+
+# Server functionalities
 
 ## Add tags to content
 
