@@ -17,6 +17,38 @@ const driver = neo4j.driver("bolt://hobby-ecmbfbmekcnhgbkeephhacal.dbs.graphened
 const queries = {
     // Query to DB using the BOLT protocol
 
+    // Export
+    // write data chunk by chunk in the response
+    exportData(res, query) {
+        res.writeHead(200, {
+            'Content-Type': 'text/plain',
+            'Transfer-Encoding': 'chunked',
+            'Trailer': 'Content-MD5'
+        });
+        const session = driver.session()
+        session
+            .run(query)
+            .subscribe({
+                onNext: function (record) {
+                    const newObj = {
+                        "type": record.get("label")[0],
+                        "id": record.get("id"),
+                        "tags": record.get("tags")
+                    }
+                    res.write(JSON.stringify(newObj) + '\n')
+                },
+                onCompleted: function () {
+                    res.addTrailers({ 'Content-MD5': '7895bf4b8828b55ceaf47747b4bca667' })
+                    res.end()
+                    session.close();
+                },
+                onError: function (error) {
+                    console.log(error);
+                    res.send({ success: false, message: error })
+                }
+            })
+    },
+
     // Write only query wrapper
     writeOnly(res, query, params) {
         const session = driver.session()
@@ -48,38 +80,6 @@ const queries = {
                 },
                 onCompleted: function () {
                     res.send(items)
-                    session.close();
-                },
-                onError: function (error) {
-                    console.log(error);
-                    res.send({ success: false, message: error })
-                }
-            })
-    },
-
-    // Export
-    // write data chunk by chunk in the response
-    exportData(res, query) {
-        res.writeHead(200, {
-            'Content-Type': 'text/plain',
-            'Transfer-Encoding': 'chunked',
-            'Trailer': 'Content-MD5'
-        });
-        const session = driver.session()
-        session
-            .run(query)
-            .subscribe({
-                onNext: function (record) {
-                    const newObj = {
-                        "type": record.get("label")[0],
-                        "id": record.get("id"),
-                        "tags": record.get("tags")
-                    }
-                    res.write(JSON.stringify(newObj) + '\n')
-                },
-                onCompleted: function () {
-                    res.addTrailers({ 'Content-MD5': '7895bf4b8828b55ceaf47747b4bca667' })
-                    res.end()
                     session.close();
                 },
                 onError: function (error) {
