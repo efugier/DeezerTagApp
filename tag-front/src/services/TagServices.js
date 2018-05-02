@@ -2,6 +2,7 @@ import TagApi from '@/services/TagApi'
 
 export default {
 
+  // /!\ Unused
   getTags (label, id, params) {
     return TagApi().get('/' + label + '/' + id, params)
   },

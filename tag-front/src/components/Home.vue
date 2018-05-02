@@ -74,6 +74,7 @@ export default {
     this.listenForRefresh()
   },
 
+  // /!\ Unused
   methods: {
     async getTags (id) {
       const response = await TagServices.getTags(this.$route.params.label, id)
