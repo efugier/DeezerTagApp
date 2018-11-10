@@ -1,6 +1,9 @@
 Deezer project: **Tag app**
 ---
 
+Exercise for an internship.
+It uses `Neo4j`, `Vue.js` and `Express`
+
 ![](https://i.imgur.com/1KHoX5s.png)
 
 # Running the app
@@ -33,7 +36,7 @@ The app can also be used without docker by running `npm install` and `npm start`
 
 As this is only a demo, I chose to conveniently host the data base (for free) on graphendb which means it is:
 * Asleep when inactive so the *very first* connexion is **very slow**.
-* Hosted in Nothern Viginia (US) which leads somewhat **slow** response time.
+* Hosted in Northern Virginia (US) which leads somewhat **slow** response time.
 * Limited to **1k** nodes
 * Limited to **10k** relations
 
